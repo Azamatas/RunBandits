@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { MapContainer, TileLayer, Polyline, useMap } from "react-leaflet";
-import polylineCodec from "@mapbox/polyline";
+import polylineEncoder from "@mapbox/polyline";
 import "leaflet/dist/leaflet.css";
 import { getSegments, getSegmentLeaderboard } from "../api/segments";
 
@@ -20,7 +20,7 @@ function fmt(seconds) {
 }
 
 function decode(polyline) {
-  try { return polylineCodec.decode(polyline); } catch { return []; }
+  try { return polylineEncoder.decode(polyline); } catch { return []; }
 }
 
 function FitAll({ positions }) {

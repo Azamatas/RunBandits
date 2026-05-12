@@ -22,6 +22,8 @@ frontend/playwright-report/
 *.swp
 *.swo
 
+# Claude Code
+.claude/
 
 # Environment
 .env
