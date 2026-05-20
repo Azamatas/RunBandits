@@ -75,11 +75,12 @@ def list_linked_activities(
         "Listing activities linked to common activity %d for user %d",
         common_activity_id, current_user.id,
     )
-    if not common_activity_service.get_common_activity(db, common_activity_id):
+    try:
+        return common_activity_service.list_linked_activities(
+            db, common_activity_id, current_user.id, limit=limit, offset=offset
+        )
+    except NotFoundError:
         raise HTTPException(status_code=404, detail="Common activity not found")
-    return common_activity_service.list_linked_activities(
-        db, common_activity_id, current_user.id, limit=limit, offset=offset
-    )
 
 
 @router.get("/{common_activity_id}/leaderboard", response_model=list[LeaderboardEntry])
@@ -103,5 +104,5 @@ def get_leaderboard(
         )
         raise HTTPException(status_code=404, detail="Common activity not found")
     return common_activity_service.get_leaderboard(
-        db, common_activity_id, viewer_id=current_user.id, limit=limit
+        db, common_activity_id, limit=limit
     )

@@ -1,5 +1,4 @@
 import logging
-import os
 from datetime import UTC, datetime, timedelta
 
 import bcrypt
@@ -7,15 +6,13 @@ from jose import jwt
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from backend.config import config
 from backend.exceptions import ConflictError, UnauthorizedError
 from backend.models.user import User
 
 logger = logging.getLogger("runbanditsrun.services.auth")
 
-SECRET_KEY = os.environ.get("JWT_SECRET_KEY", "change-me-in-production")
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24
-REFRESH_TOKEN_EXPIRE_DAYS = 7
+logger = logging.getLogger("runbanditsrun.services.auth")
 
 
 def hash_password(password: str) -> str:
@@ -27,28 +24,28 @@ def verify_password(plain: str, hashed: str) -> bool:
 
 
 def create_access_token(user_id: int) -> str:
-    expire = datetime.now(UTC) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    expire = datetime.now(UTC) + timedelta(minutes=config.ACCESS_TOKEN_EXPIRE_MINUTES)
     logger.debug(f"Creating access token for user {user_id}")
     return jwt.encode(
-        {"sub": str(user_id), "exp": expire, "type": "access"}, SECRET_KEY, algorithm=ALGORITHM
+        {"sub": str(user_id), "exp": expire, "type": "access"}, config.JWT_SECRET_KEY, algorithm=config.JWT_ALGORITHM
     )
 
 
 def create_refresh_token(user_id: int) -> str:
-    expire = datetime.now(UTC) + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
+    expire = datetime.now(UTC) + timedelta(days=config.REFRESH_TOKEN_EXPIRE_DAYS)
     logger.debug(f"Creating refresh token for user {user_id}")
     return jwt.encode(
-        {"sub": str(user_id), "exp": expire, "type": "refresh"}, SECRET_KEY, algorithm=ALGORITHM
+        {"sub": str(user_id), "exp": expire, "type": "refresh"}, config.JWT_SECRET_KEY, algorithm=config.JWT_ALGORITHM
     )
 
 
 def decode_token(token: str) -> dict:
-    payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+    payload = jwt.decode(token, config.JWT_SECRET_KEY, algorithms=[config.JWT_ALGORITHM])
     return payload
 
 
 def decode_access_token(token: str) -> dict:
-    payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+    payload = jwt.decode(token, config.JWT_SECRET_KEY, algorithms=[config.JWT_ALGORITHM])
     if payload.get("type") != "access":
         logger.warning("Invalid token type: expected access")
         raise UnauthorizedError("Invalid token type: expected access")
@@ -56,7 +53,7 @@ def decode_access_token(token: str) -> dict:
 
 
 def decode_refresh_token(token: str) -> dict:
-    payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+    payload = jwt.decode(token, config.JWT_SECRET_KEY, algorithms=[config.JWT_ALGORITHM])
     if payload.get("type") != "refresh":
         logger.warning("Invalid token type: expected refresh")
         raise UnauthorizedError("Invalid token type: expected refresh")

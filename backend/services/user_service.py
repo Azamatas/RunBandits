@@ -10,6 +10,7 @@ from backend.models.friendship import Friendship, FriendshipStatus
 from backend.models.user import User
 from backend.schemas.activity import ActivityOut
 from backend.schemas.friendship import FriendRequestOut, SentFriendRequestOut
+from backend.schemas.user import UserOut
 from backend.services import auth_service
 from backend.services.activity_service import enrich_activity
 
@@ -125,7 +126,7 @@ def get_sent_friend_requests(db: Session, user_id: int) -> list["SentFriendReque
     ]
 
 
-def search_users(db: Session, current_user_id: int, query: str = "", limit: int = 50) -> list[User]:
+def search_users(db: Session, current_user_id: int, query: str = "", limit: int = 50) -> list[UserOut]:
     logger.debug(f"User {current_user_id} searching users with query: {query}")
     if not query:
         related_ids = select(Friendship.addressee_id).where(
@@ -140,7 +141,7 @@ def search_users(db: Session, current_user_id: int, query: str = "", limit: int 
         q = db.query(User).filter(User.id != current_user_id, ~User.id.in_(related_ids))
     else:
         q = db.query(User).filter(User.id != current_user_id, User.username.ilike(f"%{query}%"))
-    return q.limit(limit).all()
+    return [UserOut.model_validate(u) for u in q.limit(limit).all()]
 
 
 def send_friend_request(db: Session, current_user_id: int, target_user_id: int) -> str:

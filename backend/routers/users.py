@@ -80,7 +80,7 @@ def list_sent_friend_requests(
     return user_service.get_sent_friend_requests(db, current_user.id)
 
 
-@router.get("/search")
+@router.get("/search", response_model=list[UserOut])
 def search_users(
     q: str = "", db: Session = Depends(get_db), current_user: User = Depends(get_current_user)
 ):
