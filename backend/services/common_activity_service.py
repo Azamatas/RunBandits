@@ -1,4 +1,5 @@
 import logging
+from dataclasses import dataclass
 
 from fastapi import HTTPException
 from sqlalchemy import func, select, text, update
@@ -10,6 +11,13 @@ from backend.models.common_activity import CommonActivity
 from backend.models.user import User
 
 logger = logging.getLogger("runbanditsrun.services.common_activity")
+
+
+@dataclass
+class CommonActivityCreateData:
+    name: str
+    sport_type: str
+    polyline: str
 
 
 def _validate_not_too_close(db: Session, sport_type: str, path_geom) -> None:
@@ -50,9 +58,9 @@ def _link_existing_activities(db: Session, common_activity_id: int, sport_type: 
     return result.rowcount  # type: ignore[no-any-return, attr-defined]
 
 
-def create_common_activity(db: Session, data: dict) -> CommonActivity:
-    sport_type = data["sport_type"]
-    polyline = data["polyline"]
+def create_common_activity(db: Session, data: CommonActivityCreateData) -> CommonActivity:
+    sport_type = data.sport_type
+    polyline = data.polyline
 
     path_geom = db.scalar(
         text("SELECT ST_Transform(ST_LineFromEncodedPolyline(:poly), 3857)"),
@@ -63,7 +71,7 @@ def create_common_activity(db: Session, data: dict) -> CommonActivity:
 
     _validate_not_too_close(db, sport_type, path_geom)
 
-    ca = CommonActivity(name=data["name"], sport_type=sport_type, polyline=polyline)
+    ca = CommonActivity(name=data.name, sport_type=sport_type, polyline=polyline)
     db.add(ca)
     db.flush()
 
@@ -75,7 +83,7 @@ def create_common_activity(db: Session, data: dict) -> CommonActivity:
 
     db.commit()
     db.refresh(ca)
-    logger.info("Created common activity %d: %s", ca.id, data["name"])
+    logger.info("Created common activity %d: %s", ca.id, data.name)
     return ca
 
 

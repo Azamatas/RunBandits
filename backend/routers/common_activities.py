@@ -12,6 +12,7 @@ from backend.schemas.common_activity import (
     LeaderboardEntry,
 )
 from backend.services import common_activity_service
+from backend.services.common_activity_service import CommonActivityCreateData
 
 logger = logging.getLogger("runbanditsrun.routers.common_activities")
 
@@ -39,7 +40,7 @@ def create_common_activity(
 ):
     logger.info("User %d creating common activity", current_user.id)
     ca = common_activity_service.create_common_activity(
-        db, body.model_dump()
+        db, CommonActivityCreateData(name=body.name, sport_type=body.sport_type, polyline=body.polyline)
     )
     logger.info("User %d created common activity %d", current_user.id, ca.id)
     return ca

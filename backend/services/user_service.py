@@ -1,4 +1,5 @@
 import logging
+from dataclasses import dataclass, fields
 
 from sqlalchemy import or_, select
 from sqlalchemy.orm import Session
@@ -18,15 +19,24 @@ def get_user(db: Session, user_id: int) -> User | None:
     return db.query(User).filter(User.id == user_id).first()
 
 
-def update_user(db: Session, current_user: User, updates: dict) -> User:
-    logger.info(f"Updating user {current_user.id} with changes: {list(updates.keys())}")
-    if "username" in updates and updates["username"] != current_user.username:
-        existing = auth_service.get_user_by_username(db, updates["username"])
+@dataclass
+class UserUpdateData:
+    username: str | None = None
+    bio: str | None = None
+    location: str | None = None
+
+
+def update_user(db: Session, current_user: User, updates: UserUpdateData) -> User:
+    logger.info(f"Updating user {current_user.id} with changes: {[f.name for f in fields(updates) if getattr(updates, f.name) is not None]}")
+    if updates.username is not None and updates.username != current_user.username:
+        existing = auth_service.get_user_by_username(db, updates.username)
         if existing:
-            logger.warning(f"Username {updates['username']} already taken by user {existing.id}")
+            logger.warning(f"Username {updates.username} already taken by user {existing.id}")
             raise ValueError("Username already taken")
-    for field, value in updates.items():
-        setattr(current_user, field, value)
+    for field in fields(updates):
+        value = getattr(updates, field.name)
+        if value is not None:
+            setattr(current_user, field.name, value)
     db.commit()
     db.refresh(current_user)
     logger.info(f"User {current_user.id} updated successfully")

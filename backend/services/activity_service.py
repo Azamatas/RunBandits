@@ -1,12 +1,14 @@
 from __future__ import annotations
 
 import logging
+from dataclasses import asdict, dataclass, fields
+from datetime import datetime
 
 from sqlalchemy import and_, or_, select
 from sqlalchemy.orm import Query, Session, selectinload
 from sqlalchemy.sql.selectable import CompoundSelect
 
-from backend.models.activity import Activity, Visibility
+from backend.models.activity import Activity, SportType, Visibility
 from backend.models.friendship import Friendship, FriendshipStatus
 from backend.models.user import User
 from backend.services import common_activity_service
@@ -78,9 +80,33 @@ def enrich_activity(activity: Activity, user_id: int) -> dict:
     }
 
 
-def create_activity(db: Session, owner_id: int, data: dict, tagged_ids: list[int]) -> Activity:
-    logger.info(f"Creating activity for user {owner_id} with data: {list(data.keys())}")
-    activity = Activity(owner_id=owner_id, **data)
+@dataclass
+class ActivityCreateData:
+    title: str
+    sport_type: SportType
+    distance: float | None = None
+    duration: int | None = None
+    elevation: float | None = None
+    polyline: str | None = None
+    visibility: Visibility = Visibility.PUBLIC
+    started_at: datetime | None = None
+
+
+@dataclass
+class ActivityUpdateData:
+    title: str | None = None
+    sport_type: SportType | None = None
+    distance: float | None = None
+    duration: int | None = None
+    elevation: float | None = None
+    polyline: str | None = None
+    visibility: Visibility | None = None
+    started_at: datetime | None = None
+
+
+def create_activity(db: Session, owner_id: int, data: ActivityCreateData, tagged_ids: list[int]) -> Activity:
+    logger.info(f"Creating activity for user {owner_id} with data: {list(asdict(data).keys())}")
+    activity = Activity(owner_id=owner_id, **asdict(data))
     if tagged_ids:
         tagged = db.query(User).filter(User.id.in_(tagged_ids)).all()
         activity.tagged_athletes = tagged
@@ -102,7 +128,7 @@ def get_activity(db: Session, activity_id: int, viewer_id: int | None) -> Activi
     return None
 
 
-def update_activity(db: Session, activity_id: int, owner_id: int, updates: dict) -> Activity | None:
+def update_activity(db: Session, activity_id: int, owner_id: int, updates: ActivityUpdateData) -> Activity | None:
     logger.info(f"Updating activity {activity_id} by owner {owner_id}")
     activity = (
         _query_activities_with_relations(db)
@@ -112,8 +138,10 @@ def update_activity(db: Session, activity_id: int, owner_id: int, updates: dict)
     if not activity:
         logger.warning(f"Activity {activity_id} not found for owner {owner_id}")
         return None
-    for field, value in updates.items():
-        setattr(activity, field, value)
+    for field in fields(updates):
+        value = getattr(updates, field.name)
+        if value is not None:
+            setattr(activity, field.name, value)
     db.commit()
     db.refresh(activity)
     logger.info(f"Updated activity {activity_id}")

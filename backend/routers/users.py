@@ -11,6 +11,7 @@ from backend.schemas.activity import ActivityOut
 from backend.schemas.friendship import FriendRequestOut, SentFriendRequestOut
 from backend.schemas.user import UserOut, UserUpdate
 from backend.services import user_service
+from backend.services.user_service import UserUpdateData
 
 logger = logging.getLogger("runbanditsrun.routers.users")
 
@@ -29,7 +30,10 @@ def update_me(
 ):
     logger.info(f"User {current_user.id} updating profile")
     try:
-        result = user_service.update_user(db, current_user, body.model_dump(exclude_none=True))
+        result = user_service.update_user(
+            db, current_user,
+            UserUpdateData(username=body.username, bio=body.bio, location=body.location),
+        )
         logger.info(f"User {current_user.id} profile updated")
         return result
     except ValueError as e:

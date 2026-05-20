@@ -9,6 +9,7 @@ from backend.models.user import User
 from backend.routers.deps import get_current_user
 from backend.schemas.activity import ActivityCreate, ActivityOut, ActivityUpdate
 from backend.services import activity_service
+from backend.services.activity_service import ActivityCreateData, ActivityUpdateData
 
 logger = logging.getLogger("runbanditsrun.routers.activities")
 
@@ -38,8 +39,20 @@ def create_activity(
     current_user: User = Depends(get_current_user),
 ):
     logger.info(f"User {current_user.id} creating activity")
-    data = body.model_dump(exclude={"tagged_athlete_ids"})
-    activity = activity_service.create_activity(db, current_user.id, data, body.tagged_athlete_ids)
+    activity = activity_service.create_activity(
+        db, current_user.id,
+        ActivityCreateData(
+            title=body.title,
+            sport_type=body.sport_type,
+            distance=body.distance,
+            duration=body.duration,
+            elevation=body.elevation,
+            polyline=body.polyline,
+            visibility=body.visibility,
+            started_at=body.started_at,
+        ),
+        body.tagged_athlete_ids,
+    )
     logger.info(f"User {current_user.id} created activity {activity.id}")
     return activity_service.enrich_activity(activity, current_user.id)
 
@@ -65,7 +78,17 @@ def update_activity(
 ):
     logger.info(f"User {current_user.id} updating activity {activity_id}")
     activity = activity_service.update_activity(
-        db, activity_id, current_user.id, body.model_dump(exclude_none=True)
+        db, activity_id, current_user.id,
+        ActivityUpdateData(
+            title=body.title,
+            sport_type=body.sport_type,
+            distance=body.distance,
+            duration=body.duration,
+            elevation=body.elevation,
+            polyline=body.polyline,
+            visibility=body.visibility,
+            started_at=body.started_at,
+        ),
     )
     if not activity:
         logger.warning(f"Activity {activity_id} not found for update by user {current_user.id}")
