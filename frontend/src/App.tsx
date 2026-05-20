@@ -10,6 +10,8 @@ import EditActivity from "./pages/EditActivity";
 import Profile from "./pages/Profile";
 import UserProfile from "./pages/UserProfile";
 import Social from "./pages/Social";
+import CommonActivities from "./pages/CommonActivities";
+import CommonActivityDetail from "./pages/CommonActivityDetail";
 import CreateCommonActivity from "./pages/CreateCommonActivity";
 
 export default function App() {
@@ -27,6 +29,8 @@ export default function App() {
         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
         <Route path="/users/:id" element={<ProtectedRoute><UserProfile /></ProtectedRoute>} />
         <Route path="/social" element={<ProtectedRoute><Social /></ProtectedRoute>} />
+        <Route path="/common-activities" element={<ProtectedRoute><CommonActivities /></ProtectedRoute>} />
+        <Route path="/common-activities/:id" element={<ProtectedRoute><CommonActivityDetail /></ProtectedRoute>} />
         <Route path="*" element={<Navigate to="/feed" replace />} />
       </Routes>
     </>

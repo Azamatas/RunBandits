@@ -54,7 +54,7 @@ export default function CreateCommonActivity() {
     mutationFn: createCommonActivity,
     onSuccess: (ca) => {
       localStorage.removeItem(DRAFT_KEY);
-      navigate(`/activities?common=${ca.id}`);
+      navigate(`/common-activities/${ca.id}`);
     },
   });
 

@@ -153,7 +153,7 @@ export default function Social() {
       )}
 
       {searchResults?.length > 0 && (
-        <>
+        <div data-testid="search-results">
           <h3 className="section-title">{query ? "Search Results" : "Suggested Athletes"}</h3>
           {searchResults?.map((u) => (
             <UserCard
@@ -165,7 +165,7 @@ export default function Social() {
               loading={sendFriendRequestMutation.isPending || acceptFriendRequestMutation.isPending}
             />
           ))}
-        </>
+        </div>
       )}
       {searchResults?.length === 0 && query && (
         <p style={{ color: "var(--text-muted)", fontSize: "var(--text-sm)" }}>

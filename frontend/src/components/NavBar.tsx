@@ -38,6 +38,9 @@ export default function NavBar() {
             <NavLink to="/social" className={({ isActive }) => `nav-link${isActive ? " active" : ""}`}>
               <span>Social</span>
             </NavLink>
+            <NavLink to="/common-activities" className={({ isActive }) => `nav-link${isActive ? " active" : ""}`}>
+              <span>Common Activities</span>
+            </NavLink>
             <NavLink to="/add-activity" className={({ isActive }) => `nav-link nav-log-btn${isActive ? " active" : ""}`}>
               <span className="nav-log-plus" aria-hidden="true">+</span>
               <span>Add Activity</span>

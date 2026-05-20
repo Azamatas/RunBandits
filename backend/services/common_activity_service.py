@@ -125,6 +125,31 @@ def list_common_activities(
     return query.all()
 
 
+def list_linked_activities(
+    db: Session,
+    common_activity_id: int,
+    viewer_id: int,
+    limit: int = 20,
+    offset: int = 0,
+) -> list[dict]:
+    from backend.services.activity_service import (
+        _filter_visible_activities,
+        _query_activities_with_relations,
+        enrich_activity,
+    )
+
+    logger.debug(
+        "Listing activities linked to common %d for viewer %d (offset=%d, limit=%d)",
+        common_activity_id, viewer_id, offset, limit,
+    )
+    query = _query_activities_with_relations(db).filter(
+        Activity.common_activity_id == common_activity_id
+    )
+    query = _filter_visible_activities(query, viewer_id)
+    activities = query.order_by(Activity.duration.asc().nulls_last()).offset(offset).limit(limit).all()
+    return [enrich_activity(a, viewer_id) for a in activities]
+
+
 def get_leaderboard(db: Session, common_activity_id: int, limit: int = 10) -> list[dict]:
     logger.debug(
         "Generating leaderboard for common activity %d with limit=%d",

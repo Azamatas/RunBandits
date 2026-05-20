@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { MapContainer, TileLayer, Polyline, Marker, Popup, useMapEvents } from "react-leaflet";
+import { MapContainer, TileLayer, Polyline, Marker, Popup, useMap, useMapEvents } from "react-leaflet";
 import polylineCodec from "@mapbox/polyline";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -55,6 +55,14 @@ function legLabelIcon(label: string) {
 
 function ClickHandler({ onAdd }: { onAdd: (pt: LatLng) => void }) {
   useMapEvents({ click: (e) => onAdd([e.latlng.lat, e.latlng.lng]) });
+  return null;
+}
+
+function RecenterMap({ center }: { center: LatLng }) {
+  const map = useMap();
+  useEffect(() => {
+    map.setView(center, map.getZoom());
+  }, [map, center[0], center[1]]);
   return null;
 }
 
@@ -117,6 +125,7 @@ export default function RouteBuilder({ onChange, onDistance, onDuration }: Route
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
           <ClickHandler onAdd={addPoint} />
+          <RecenterMap center={center} />
           {points.length >= 2 && (
             <Polyline positions={points} pathOptions={{ color: "var(--accent)", weight: 4, opacity: 0.85 }} />
           )}

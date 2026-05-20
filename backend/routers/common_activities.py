@@ -7,6 +7,7 @@ from backend.database import get_db
 from backend.exceptions import BadRequestError, ConflictError, NotFoundError
 from backend.models.user import User
 from backend.routers.deps import get_current_user
+from backend.schemas.activity import ActivityOut
 from backend.schemas.common_activity import (
     CommonActivityCreate,
     CommonActivityOut,
@@ -60,6 +61,25 @@ def get_common_activity(common_activity_id: int, db: Session = Depends(get_db)):
     except NotFoundError:
         logger.warning("Common activity %d not found", common_activity_id)
         raise HTTPException(status_code=404, detail="Common activity not found")
+
+
+@router.get("/{common_activity_id}/activities", response_model=list[ActivityOut])
+def list_linked_activities(
+    common_activity_id: int,
+    limit: int = Query(20, ge=1, le=100),
+    offset: int = Query(0, ge=0),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    logger.debug(
+        "Listing activities linked to common activity %d for user %d",
+        common_activity_id, current_user.id,
+    )
+    if not common_activity_service.get_common_activity(db, common_activity_id):
+        raise HTTPException(status_code=404, detail="Common activity not found")
+    return common_activity_service.list_linked_activities(
+        db, common_activity_id, current_user.id, limit=limit, offset=offset
+    )
 
 
 @router.get("/{common_activity_id}/leaderboard", response_model=list[LeaderboardEntry])
