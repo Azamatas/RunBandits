@@ -1,4 +1,3 @@
-import os
 from unittest.mock import patch
 
 import pytest
@@ -6,6 +5,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import sessionmaker
 
+from backend.config import config
 from backend.database import get_db
 from backend.main import app
 from backend.models.user import User
@@ -13,12 +13,7 @@ from backend.services import auth_service
 
 MOCK_HASH = "$2b$12$fakehashfakehashfakehashfakehashfake"
 
-DATABASE_URL = os.environ.get(
-    "DATABASE_URL",
-    "postgresql://runbandits:runbandits@localhost:5432/runbandits",
-)
-
-engine = create_engine(DATABASE_URL)
+engine = create_engine(config.DATABASE_URL)
 
 
 @pytest.fixture(autouse=True)

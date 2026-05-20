@@ -13,7 +13,8 @@ class Config:
     # JWT
     JWT_SECRET_KEY = os.environ.get("JWT_SECRET_KEY", "change-me-in-production")
     JWT_ALGORITHM = os.environ.get("JWT_ALGORITHM", "HS256")
-    ACCESS_TOKEN_EXPIRE_MINUTES = int(os.environ.get("ACCESS_TOKEN_EXPIRE_MINUTES", "60"))
+    ACCESS_TOKEN_EXPIRE_MINUTES = int(os.environ.get("ACCESS_TOKEN_EXPIRE_MINUTES", "1440"))  # 24h
+    REFRESH_TOKEN_EXPIRE_DAYS = int(os.environ.get("REFRESH_TOKEN_EXPIRE_DAYS", "7"))
 
     # CORS
     ALLOWED_ORIGINS = os.environ.get("ALLOWED_ORIGINS", "http://localhost:5173").split(",")

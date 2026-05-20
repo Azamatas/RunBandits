@@ -104,5 +104,5 @@ def get_leaderboard(
         )
         raise HTTPException(status_code=404, detail="Common activity not found")
     return common_activity_service.get_leaderboard(
-        db, common_activity_id, viewer_id=current_user.id, limit=limit
+        db, common_activity_id, limit=limit
     )
