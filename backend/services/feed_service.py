@@ -5,6 +5,7 @@ import logging
 from sqlalchemy.orm import Session
 
 from backend.models.activity import Activity
+from backend.schemas.activity import ActivityOut
 from backend.services.activity_service import (
     _filter_visible_activities,
     _query_activities_with_relations,
@@ -14,7 +15,7 @@ from backend.services.activity_service import (
 logger = logging.getLogger("runbanditsrun.services.feed")
 
 
-def get_feed(db: Session, viewer_id: int, limit: int = 20, offset: int = 0) -> list[dict]:
+def get_feed(db: Session, viewer_id: int, limit: int = 20, offset: int = 0) -> list[ActivityOut]:
     logger.debug(f"Generating feed for user {viewer_id} with limit={limit}, offset={offset}")
     query = _query_activities_with_relations(db)
     query = _filter_visible_activities(query, viewer_id)

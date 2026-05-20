@@ -4,11 +4,12 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from backend.models.activity import Activity, SportType
+from backend.schemas.stats import PersonalRecord, StatsTotals
 
 logger = logging.getLogger("runbanditsrun.services.stats")
 
 
-def get_totals(db: Session, user_id: int, sport_type: SportType | None = None) -> dict:
+def get_totals(db: Session, user_id: int, sport_type: SportType | None = None) -> dict[str, StatsTotals]:
     logger.debug(f"Calculating totals for user {user_id} with sport_type={sport_type}")
     query = db.query(
         Activity.sport_type,
@@ -22,17 +23,17 @@ def get_totals(db: Session, user_id: int, sport_type: SportType | None = None) -
     rows = query.group_by(Activity.sport_type).all()
 
     return {
-        row.sport_type: {
-            "count": row.count,
-            "total_distance": row.total_distance or 0,
-            "total_elevation": row.total_elevation or 0,
-            "total_duration": row.total_duration or 0,
-        }
+        row.sport_type: StatsTotals(
+            count=row.count,  # type: ignore[arg-type]
+            total_distance=row.total_distance or 0,
+            total_elevation=row.total_elevation or 0,
+            total_duration=row.total_duration or 0,
+        )
         for row in rows
     }
 
 
-def get_personal_records(db: Session, user_id: int) -> list[dict]:
+def get_personal_records(db: Session, user_id: int) -> list[PersonalRecord]:
     logger.debug(f"Fetching personal records for user {user_id}")
     # TODO
     return []

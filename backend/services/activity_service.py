@@ -12,6 +12,7 @@ from backend.exceptions import NotFoundError
 from backend.models.activity import Activity, SportType, Visibility
 from backend.models.friendship import Friendship, FriendshipStatus
 from backend.models.user import User
+from backend.schemas.activity import ActivityOut
 from backend.services import common_activity_service
 
 logger = logging.getLogger("runbanditsrun.services.activity")
@@ -72,13 +73,13 @@ def can_view(db: Session, activity: Activity, viewer_id: int | None) -> bool:
     return False
 
 
-def enrich_activity(activity: Activity, user_id: int) -> dict:
-    return {
+def enrich_activity(activity: Activity, user_id: int) -> ActivityOut:
+    return ActivityOut.model_validate({
         **activity.__dict__,
         "kudos_count": len(activity.kudos),
         "owner_username": activity.owner.username,
         "user_has_kudos": any(k.user_id == user_id for k in activity.kudos),
-    }
+    })
 
 
 @dataclass
@@ -166,7 +167,7 @@ def delete_activity(db: Session, activity_id: int, owner_id: int) -> None:
 
 def list_activities(
     db: Session, viewer_id: int, sport_type=None, offset: int = 0, limit: int = 20
-) -> list[dict]:
+) -> list[ActivityOut]:
     logger.debug(
         f"Listing activities for viewer {viewer_id} with filters: sport={sport_type}, offset={offset}, limit={limit}"
     )
