@@ -1,12 +1,12 @@
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, Field, field_validator
 
 from backend.models.activity import SportType
 
 
 class CommonActivityCreate(BaseModel):
-    name: str
+    name: str = Field(min_length=1, max_length=200)
     sport_type: SportType
-    polyline: str
+    polyline: str = Field(max_length=100000)
 
     @field_validator("polyline")
     @classmethod

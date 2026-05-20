@@ -9,12 +9,12 @@ Int32 = Annotated[int, Field(ge=0, le=2147483647)]
 
 
 class ActivityCreate(BaseModel):
-    title: str
+    title: str = Field(min_length=1, max_length=200)
     sport_type: SportType
-    distance: float | None = None
+    distance: float | None = Field(default=None, ge=0)
     duration: Int32 | None = None
-    elevation: float | None = None
-    polyline: str | None = None
+    elevation: float | None = Field(default=None, ge=0)
+    polyline: str | None = Field(default=None, max_length=100000)
     visibility: Visibility = Visibility.PUBLIC
     started_at: datetime | None = None
     tagged_athlete_ids: list[Annotated[int, Field(ge=1)]] = []
@@ -40,11 +40,11 @@ class ActivityOut(BaseModel):
 
 
 class ActivityUpdate(BaseModel):
-    title: str | None = None
+    title: str | None = Field(default=None, min_length=1, max_length=200)
     sport_type: SportType | None = None
-    distance: float | None = None
+    distance: float | None = Field(default=None, ge=0)
     duration: Int32 | None = None
-    elevation: float | None = None
-    polyline: str | None = None
+    elevation: float | None = Field(default=None, ge=0)
+    polyline: str | None = Field(default=None, max_length=100000)
     visibility: Visibility | None = None
     started_at: datetime | None = None

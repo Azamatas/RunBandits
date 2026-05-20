@@ -23,3 +23,7 @@ class SentFriendRequestOut(BaseModel):
     created_at: datetime | None
 
     model_config = {"from_attributes": True}
+
+
+class FriendRequestStatus(BaseModel):
+    status: str

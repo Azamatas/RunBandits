@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class UserOut(BaseModel):
@@ -14,6 +14,6 @@ class UserOut(BaseModel):
 
 
 class UserUpdate(BaseModel):
-    username: str | None = None
-    bio: str | None = None
-    location: str | None = None
+    username: str | None = Field(default=None, min_length=3, max_length=50)
+    bio: str | None = Field(default=None, max_length=5000)
+    location: str | None = Field(default=None, max_length=100)

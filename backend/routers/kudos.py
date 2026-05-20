@@ -7,6 +7,7 @@ from backend.database import get_db
 from backend.exceptions import ConflictError, NotFoundError
 from backend.models.user import User
 from backend.routers.deps import get_current_user
+from backend.schemas.kudos import KudosResponse
 from backend.services import kudos_service
 
 logger = logging.getLogger("runbanditsrun.routers.kudos")
@@ -14,7 +15,7 @@ logger = logging.getLogger("runbanditsrun.routers.kudos")
 router = APIRouter(prefix="/activities", tags=["kudos"])
 
 
-@router.post("/{activity_id}/kudos", status_code=201)
+@router.post("/{activity_id}/kudos", status_code=201, response_model=KudosResponse)
 def give_kudos(
     activity_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)
 ):

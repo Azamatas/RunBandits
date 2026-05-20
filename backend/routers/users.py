@@ -9,7 +9,7 @@ from backend.models.activity import SportType
 from backend.models.user import User
 from backend.routers.deps import get_current_user
 from backend.schemas.activity import ActivityOut
-from backend.schemas.friendship import FriendRequestOut, SentFriendRequestOut
+from backend.schemas.friendship import FriendRequestOut, FriendRequestStatus, SentFriendRequestOut
 from backend.schemas.user import UserOut, UserUpdate
 from backend.services import user_service
 from backend.services.user_service import UserUpdateData
@@ -117,7 +117,7 @@ def list_user_activities(
         raise HTTPException(status_code=404, detail="User not found")
 
 
-@router.post("/{user_id}/friend-request", status_code=201)
+@router.post("/{user_id}/friend-request", status_code=201, response_model=FriendRequestStatus)
 def send_friend_request(
     user_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)
 ):
@@ -131,7 +131,7 @@ def send_friend_request(
     return {"status": status}
 
 
-@router.post("/{user_id}/accept-friend", status_code=200)
+@router.post("/{user_id}/accept-friend", status_code=200, response_model=FriendRequestStatus)
 def accept_friend_request(
     user_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)
 ):
