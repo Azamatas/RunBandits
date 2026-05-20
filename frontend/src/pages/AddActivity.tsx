@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { REFETCH_INTERVAL_MS } from "../constants/query";
 import { createActivity } from "../api/activities";
-import { getFriends } from "../api/users";
+import { getFriends, getUserStats } from "../api/users";
+import { useAuth } from "../context/AuthContext";
 import SportIcon from "../components/SportIcon";
 import RouteBuilder, { ROUTE_DRAFT_KEY } from "../components/RouteBuilder";
 import { SPORT_THUMBNAILS } from "../constants/images";
@@ -31,7 +32,6 @@ const DEFAULT_FORM = {
   sport_type: "run",
   distance: "",
   duration: "",
-  elevation: "",
   visibility: "public",
   polyline: "",
 };
@@ -47,6 +47,7 @@ function loadDraft() {
 
 export default function AddActivity() {
   const navigate = useNavigate();
+  const { user: currentUser } = useAuth();
   const draft = loadDraft();
   const [form, setForm] = useState({ ...DEFAULT_FORM, ...(draft?.form ?? {}) });
   const [taggedIds, setTaggedIds] = useState(draft?.taggedIds ?? []);
@@ -61,6 +62,18 @@ export default function AddActivity() {
     queryFn: getFriends,
     refetchInterval: REFETCH_INTERVAL_MS,
   });
+
+  const { data: stats } = useQuery({
+    queryKey: ["userStats", currentUser?.id],
+    queryFn: () => getUserStats(currentUser.id),
+    enabled: !!currentUser?.id,
+  });
+
+  const sportTotals = stats?.totals?.[form.sport_type];
+  const paceMinPerKm =
+    sportTotals && sportTotals.total_distance > 0 && sportTotals.total_duration > 0
+      ? (sportTotals.total_duration / sportTotals.total_distance) * 1000 / 60
+      : null;
 
   const mutation = useMutation({
     mutationFn: createActivity,
@@ -94,7 +107,7 @@ export default function AddActivity() {
       ...form,
       distance: form.distance ? parseFloat(form.distance) * 1000 : null,
       duration: form.duration ? parseInt(form.duration) * 60 : null,
-      elevation: form.elevation ? parseFloat(form.elevation) : null,
+      elevation: null,
       polyline: form.polyline || null,
       tagged_athlete_ids: taggedIds,
     });
@@ -130,21 +143,6 @@ export default function AddActivity() {
           <div className="form-group">
             <label>Title</label>
             <input required value={form.title} onChange={set("title")} placeholder="Morning Run" />
-          </div>
-
-          <div className="form-row form-row-3">
-            <div className="form-group">
-              <label>Distance (km)</label>
-              <input type="number" step="0.01" min="0" value={form.distance} onChange={set("distance")} placeholder="5.0" />
-            </div>
-            <div className="form-group">
-              <label>Duration (min)</label>
-              <input type="number" min="0" value={form.duration} onChange={set("duration")} placeholder="30" />
-            </div>
-            <div className="form-group">
-              <label>Elevation (m)</label>
-              <input type="number" value={form.elevation} onChange={set("elevation")} placeholder="120" />
-            </div>
           </div>
 
           <div className="form-group">
@@ -211,6 +209,7 @@ export default function AddActivity() {
               onChange={(polyline) => setForm((f) => ({ ...f, polyline }))}
               onDistance={(km) => setForm((f) => ({ ...f, distance: km > 0 ? km.toFixed(2) : f.distance }))}
               onDuration={(min) => setForm((f) => ({ ...f, duration: min > 0 ? String(Math.round(min)) : f.duration }))}
+              paceMinPerKm={paceMinPerKm}
             />
           </div>
 

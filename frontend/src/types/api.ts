@@ -81,9 +81,19 @@ export interface SportTotals {
   total_duration: number;
 }
 
+export type PersonalRecordType =
+  | "longest_distance"
+  | "longest_duration"
+  | "fastest_pace"
+  | "fastest_speed"
+  | "biggest_climb";
+
 export interface PersonalRecord {
-  segment_id: number;
-  best_time: number;
+  sport_type: SportType;
+  record_type: PersonalRecordType;
+  value: number;
+  activity_id: number;
+  achieved_at: string | null;
 }
 
 export interface Stats {

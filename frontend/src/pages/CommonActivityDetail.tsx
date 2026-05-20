@@ -67,7 +67,7 @@ export default function CommonActivityDetail() {
           No runs yet. Log one with a similar route to see it appear here.
         </p>
       ) : (
-        <div className="activities-grid">
+        <div className="activities-scroll">
           {activities.map((a) => (
             <ActivityCard key={a.id} activity={a} queryKey={activitiesQueryKey} />
           ))}

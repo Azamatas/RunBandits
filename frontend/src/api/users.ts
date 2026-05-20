@@ -12,6 +12,8 @@ export const acceptFriendRequest = (id: number): Promise<{ status: string }> =>
   client.post(`/users/${id}/accept-friend`).then((r) => r.data);
 export const removeFriend = (id: number): Promise<void> => client.delete(`/users/${id}/friend`).then((r) => r.data);
 export const getStats = (): Promise<Stats> => client.get("/stats/me").then((r) => r.data);
+export const getUserStats = (id: number | string): Promise<Stats> =>
+  client.get(`/stats/users/${id}`).then((r) => r.data);
 export const searchUsers = (q: string): Promise<User[]> =>
   client.get("/users/search", { params: { q } }).then((r) => r.data);
 export const getFriends = (): Promise<User[]> => client.get("/users/me/friends").then((r) => r.data);

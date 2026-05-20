@@ -4,6 +4,7 @@ import { getStats, getUserActivities } from "../api/users";
 import ActivityCard from "../components/ActivityCard";
 import ActivityFilters from "../components/ActivityFilters";
 import EditProfileModal from "../components/EditProfileModal";
+import PersonalRecordsCard from "../components/PersonalRecordsCard";
 import SportIcon from "../components/SportIcon";
 import { useAuth } from "../context/AuthContext";
 import { HERO_IMAGES, EMPTY_STATE_IMAGES } from "../constants/images";
@@ -32,13 +33,6 @@ const SPORT_COLORS: Record<string, string> = {
   hike: "var(--sport-hike)",
 };
 
-function fmtTime(seconds: number | null): string {
-  if (seconds == null) return "-";
-  const m = Math.floor(seconds / 60);
-  const s = seconds % 60;
-  return `${m}:${String(s).padStart(2, "0")}`;
-}
-
 export default function Profile() {
   const { user } = useAuth();
   const [editing, setEditing] = useState(false);
@@ -61,12 +55,12 @@ export default function Profile() {
     ? Object.entries(stats.totals).filter(([, v]) => v.count > 0)
     : [];
 
-  const prs = Array.isArray(stats?.personal_records)
-    ? stats.personal_records.filter((pr) => pr?.best_time != null)
-    : [];
+  const prs = stats?.personal_records ?? [];
+
+  const hasSidebar = sportTotals.length > 0 || prs.length > 0;
 
   return (
-    <div className="page">
+    <div className={`page${hasSidebar ? " page-with-sidebar" : ""}`}>
       {editing && <EditProfileModal onClose={() => setEditing(false)} />}
 
       <div className="card-flush profile-card" style={{ backgroundImage: `url(${HERO_IMAGES.profile})`, marginBottom: 20 }}>
@@ -89,71 +83,68 @@ export default function Profile() {
         </div>
       </div>
 
-      {/* Personal Records */}
-      {prs.length > 0 && (
-        <div className="card" style={{ marginBottom: 20 }}>
-          <h3 className="section-title">Personal Records</h3>
-          <div className="pr-grid">
-            {prs.map((pr, i) => (
-              <div className="pr-card" key={i}>
-                <div className="pr-card-value">{fmtTime(pr.best_time!)}</div>
-                <div className="pr-card-label">Record #{i + 1}</div>
+      <div className={hasSidebar ? "profile-layout" : undefined}>
+        <div className="profile-main">
+          <h3 className="section-title">Recent Activities</h3>
+          <ActivityFilters selected={sportFilter} onChange={setSportFilter} />
+
+          <div className={hasSidebar ? "activities-scroll" : undefined}>
+            {filtered.length === 0 && (
+              <div className="card">
+                <div className="empty-state">
+                  <div className="empty-state-image">
+                    <img src={EMPTY_STATE_IMAGES.noActivities} alt="No activities" />
+                  </div>
+                  <h3>No activities</h3>
+                  <p>{sportFilter === "all" ? "Log your first activity to start tracking!" : `No ${sportFilter} activities yet.`}</p>
+                </div>
               </div>
+            )}
+            {filtered.map((a, i) => (
+              <ActivityCard
+                key={a.id}
+                activity={a}
+                queryKey={["myActivities"]}
+                style={{ animationDelay: `${Math.min(i, 5) * 60}ms` }}
+              />
             ))}
           </div>
         </div>
-      )}
 
-      {sportTotals.length > 0 && (
-        <div className="card" style={{ marginBottom: 20 }}>
-          <h3 className="section-title">Training Totals</h3>
-          <div className="stats-grid">
-            {sportTotals.map(([sport, data]) => {
-              const label = SPORT_LABELS[sport] ?? sport;
-              return (
-                <div className="stat" key={sport}>
-                  <div className="stat-sport-icon" style={{ color: SPORT_COLORS[sport] }}>
-                    <SportIcon sport={sport} size={28} color="currentColor" />
-                  </div>
-                  <div className="stat-headline">
-                    <span className="stat-value">{data.count}</span>
-                    <span className="stat-label">{label}</span>
-                  </div>
-                  <div style={{ marginTop: 8, fontSize: "0.75rem", color: "var(--text-muted)" }}>
-                    {(data.total_distance / 1000).toFixed(1)} km
-                    {data.total_elevation != null && data.total_elevation > 0 && (
-                      <> \u00b7 {data.total_elevation.toFixed(0)}m elev</>
-                    )}
-                  </div>
+        {hasSidebar && (
+          <aside className="profile-side">
+            {sportTotals.length > 0 && (
+              <div className="card">
+                <h3 className="section-title">Training Totals</h3>
+                <div className="stats-grid">
+                  {sportTotals.map(([sport, data]) => {
+                    const label = SPORT_LABELS[sport] ?? sport;
+                    return (
+                      <div className="stat" key={sport}>
+                        <div className="stat-sport-icon" style={{ color: SPORT_COLORS[sport] }}>
+                          <SportIcon sport={sport} size={28} color="currentColor" />
+                        </div>
+                        <div className="stat-headline">
+                          <span className="stat-value">{data.count}</span>
+                          <span className="stat-label">{label}</span>
+                        </div>
+                        <div style={{ marginTop: 8, fontSize: "0.75rem", color: "var(--text-muted)" }}>
+                          {(data.total_distance / 1000).toFixed(1)} km
+                          {data.total_elevation != null && data.total_elevation > 0 && (
+                            <> · {data.total_elevation.toFixed(0)}m elev</>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
+              </div>
+            )}
 
-      <h3 className="section-title">Recent Activities</h3>
-      <ActivityFilters selected={sportFilter} onChange={setSportFilter} />
-
-      {filtered.length === 0 && (
-        <div className="card">
-          <div className="empty-state">
-            <div className="empty-state-image">
-              <img src={EMPTY_STATE_IMAGES.noActivities} alt="No activities" />
-            </div>
-            <h3>No activities</h3>
-            <p>{sportFilter === "all" ? "Log your first activity to start tracking!" : `No ${sportFilter} activities yet.`}</p>
-          </div>
-        </div>
-      )}
-      {filtered.map((a, i) => (
-        <ActivityCard
-          key={a.id}
-          activity={a}
-          queryKey={["myActivities"]}
-          style={{ animationDelay: `${Math.min(i, 5) * 60}ms` }}
-        />
-      ))}
+            <PersonalRecordsCard records={prs} />
+          </aside>
+        )}
+      </div>
     </div>
   );
 }

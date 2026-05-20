@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { REFETCH_INTERVAL_MS } from "../constants/query";
 import {
@@ -14,9 +14,25 @@ import UserCard from "../components/UserCard";
 import { SearchIcon } from "../components/SportIcon";
 import { HERO_IMAGES } from "../constants/images";
 
+const VIEW_STORAGE_KEY = "crew.viewMode";
+type ViewMode = "list" | "grid";
+
+function readStoredView(): ViewMode {
+  if (typeof window === "undefined") return "list";
+  const v = window.localStorage.getItem(VIEW_STORAGE_KEY);
+  return v === "grid" ? "grid" : "list";
+}
+
 export default function Social() {
   const [query, setQuery] = useState("");
+  const [view, setView] = useState<ViewMode>(readStoredView);
   const qc = useQueryClient();
+
+  useEffect(() => {
+    window.localStorage.setItem(VIEW_STORAGE_KEY, view);
+  }, [view]);
+
+  const listClass = view === "grid" ? "crew-grid" : "crew-list";
 
   const { data: searchResults } = useQuery({
     queryKey: ["searchUsers", query],
@@ -106,12 +122,35 @@ export default function Social() {
         </div>
       </div>
 
+      <div className="feed-toolbar">
+        <div className="view-toggle" role="tablist" aria-label="Crew layout">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={view === "list"}
+            className={view === "list" ? "active" : ""}
+            onClick={() => setView("list")}
+          >
+            <ListIcon /> List
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={view === "grid"}
+            className={view === "grid" ? "active" : ""}
+            onClick={() => setView("grid")}
+          >
+            <GridIcon /> Grid
+          </button>
+        </div>
+      </div>
+
       <div className="friends-section">
         <h3 className="section-title">Your Connections</h3>
         {connections.length === 0 ? (
           <p style={{ color: "var(--text-muted)" }}>No connections yet. Search for athletes to connect.</p>
         ) : (
-          <div className="friends-grid">
+          <div className={listClass}>
             {connections.map((user) => (
               <UserCard
                 key={user.id}
@@ -140,31 +179,35 @@ export default function Social() {
       {incoming.length > 0 && !query && (
         <div style={{ marginBottom: 32 }}>
           <h3 className="section-title">Friend Requests</h3>
-          {incoming.map((req) => (
-            <UserCard
-              key={req.requester_id}
-              user={req.requester}
-              status="incoming"
-              onAccept={() => acceptFriendRequestMutation.mutate(req.requester_id)}
-              loading={acceptFriendRequestMutation.isPending}
-            />
-          ))}
+          <div className={listClass}>
+            {incoming.map((req) => (
+              <UserCard
+                key={req.requester_id}
+                user={req.requester}
+                status="incoming"
+                onAccept={() => acceptFriendRequestMutation.mutate(req.requester_id)}
+                loading={acceptFriendRequestMutation.isPending}
+              />
+            ))}
+          </div>
         </div>
       )}
 
       {searchResults?.length > 0 && (
         <div data-testid="search-results">
           <h3 className="section-title">{query ? "Search Results" : "Suggested Athletes"}</h3>
-          {searchResults?.map((u) => (
-            <UserCard
-              key={u.id}
-              user={u}
-              status={query ? getStatus(u.id) : null}
-              onFollow={() => sendFriendRequestMutation.mutate(u.id)}
-              onAccept={() => acceptFriendRequestMutation.mutate(u.id)}
-              loading={sendFriendRequestMutation.isPending || acceptFriendRequestMutation.isPending}
-            />
-          ))}
+          <div className={listClass}>
+            {searchResults?.map((u) => (
+              <UserCard
+                key={u.id}
+                user={u}
+                status={query ? getStatus(u.id) : null}
+                onFollow={() => sendFriendRequestMutation.mutate(u.id)}
+                onAccept={() => acceptFriendRequestMutation.mutate(u.id)}
+                loading={sendFriendRequestMutation.isPending || acceptFriendRequestMutation.isPending}
+              />
+            ))}
+          </div>
         </div>
       )}
       {searchResults?.length === 0 && query && (
@@ -173,5 +216,26 @@ export default function Social() {
         </p>
       )}
     </div>
+  );
+}
+
+function ListIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+      <line x1="3" y1="4" x2="13" y2="4" />
+      <line x1="3" y1="8" x2="13" y2="8" />
+      <line x1="3" y1="12" x2="13" y2="12" />
+    </svg>
+  );
+}
+
+function GridIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6">
+      <rect x="2.5" y="2.5" width="4.5" height="4.5" rx="0.8" />
+      <rect x="9" y="2.5" width="4.5" height="4.5" rx="0.8" />
+      <rect x="2.5" y="9" width="4.5" height="4.5" rx="0.8" />
+      <rect x="9" y="9" width="4.5" height="4.5" rx="0.8" />
+    </svg>
   );
 }

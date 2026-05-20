@@ -2,9 +2,10 @@ import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { REFETCH_INTERVAL_MS } from "../constants/query";
-import { getUser, getUserActivities, sendFriendRequest, acceptFriendRequest, removeFriend, getFriends, getSentFriendRequests, getIncomingFriendRequests } from "../api/users";
+import { getUser, getUserActivities, getUserStats, sendFriendRequest, acceptFriendRequest, removeFriend, getFriends, getSentFriendRequests, getIncomingFriendRequests } from "../api/users";
 import ActivityCard from "../components/ActivityCard";
 import ActivityFilters from "../components/ActivityFilters";
+import PersonalRecordsCard from "../components/PersonalRecordsCard";
 import SportIcon from "../components/SportIcon";
 import { useAuth } from "../context/AuthContext";
 import { HERO_IMAGES, EMPTY_STATE_IMAGES } from "../constants/images";
@@ -47,6 +48,12 @@ export default function UserProfile() {
   const { data: activities, isLoading: actLoading } = useQuery({
     queryKey: ["userActivities", userId],
     queryFn: () => getUserActivities(userId, { limit: 50 }),
+  });
+
+  const { data: stats } = useQuery({
+    queryKey: ["userStats", userId],
+    queryFn: () => getUserStats(userId),
+    enabled: !!userId,
   });
 
   const { data: friends } = useQuery({
@@ -128,19 +135,15 @@ export default function UserProfile() {
     ? (activities ?? [])
     : (activities ?? []).filter((a) => a.sport_type === sportFilter);
 
-  type Totals = { count: number; total_distance: number; total_elevation: number };
-  const sportTotals: Record<string, Totals> = {};
-  for (const a of (activities ?? []) as any[]) {
-    const s = a.sport_type;
-    if (!sportTotals[s]) sportTotals[s] = { count: 0, total_distance: 0, total_elevation: 0 };
-    sportTotals[s].count += 1;
-    sportTotals[s].total_distance += a.distance ?? 0;
-    sportTotals[s].total_elevation += a.elevation ?? 0;
-  }
-  const sportTotalEntries: [string, Totals][] = Object.entries(sportTotals).filter(([, v]) => v.count > 0);
+  const sportTotalEntries = stats?.totals
+    ? Object.entries(stats.totals).filter(([, v]) => v.count > 0)
+    : [];
+  const personalRecords = stats?.personal_records ?? [];
+
+  const hasSidebar = sportTotalEntries.length > 0 || personalRecords.length > 0;
 
   return (
-    <div className="page">
+    <div className={`page${hasSidebar ? " page-with-sidebar" : ""}`}>
       <div className="card-flush profile-card" style={{ backgroundImage: `url(${HERO_IMAGES.profile})`, marginBottom: 20 }}>
         <div className="profile-cover-overlay" />
         <div className="profile-hero">
@@ -161,54 +164,68 @@ export default function UserProfile() {
         </div>
       </div>
 
-      {sportTotalEntries.length > 0 && (
-        <div className="card" style={{ marginBottom: 20 }}>
-          <h3 className="section-title">Training Totals</h3>
-          <div className="stats-grid">
-            {sportTotalEntries.map(([sport, data]) => {
-              const label = SPORT_LABELS[sport] ?? sport;
-              return (
-                <div className="stat" key={sport}>
-                  <div className="stat-sport-icon" style={{ color: SPORT_COLORS[sport] }}>
-                    <SportIcon sport={sport} size={28} color="currentColor" />
+      <div className={hasSidebar ? "profile-layout" : undefined}>
+        <div className="profile-main">
+          <h3 className="section-title">Activities</h3>
+          <ActivityFilters selected={sportFilter} onChange={setSportFilter} />
+
+          <div className={hasSidebar ? "activities-scroll" : undefined}>
+            {filtered.length === 0 && (
+              <div className="card">
+                <div className="empty-state">
+                  <div className="empty-state-image">
+                    <img src={EMPTY_STATE_IMAGES.noActivities} alt="No activities" />
                   </div>
-                  <div className="stat-headline">
-                    <span className="stat-value">{data.count}</span>
-                    <span className="stat-label">{label}</span>
-                  </div>
-                  <div style={{ marginTop: 8, fontSize: "0.75rem", color: "var(--text-muted)" }}>
-                    {(data.total_distance / 1000).toFixed(1)} km
-                    {data.total_elevation > 0 && <> · {data.total_elevation.toFixed(0)}m elev</>}
-                  </div>
+                  <h3>No activities</h3>
+                  <p>{sportFilter === "all" ? "This user hasn't logged any activities yet." : `No ${sportFilter} activities yet.`}</p>
                 </div>
-              );
-            })}
+              </div>
+            )}
+            {filtered.map((a, i) => (
+              <ActivityCard
+                key={a.id}
+                activity={a}
+                queryKey={["userActivities", userId]}
+                style={{ animationDelay: `${Math.min(i, 5) * 60}ms` }}
+              />
+            ))}
           </div>
         </div>
-      )}
 
-      <h3 className="section-title">Activities</h3>
-      <ActivityFilters selected={sportFilter} onChange={setSportFilter} />
+        {hasSidebar && (
+          <aside className="profile-side">
+            {sportTotalEntries.length > 0 && (
+              <div className="card">
+                <h3 className="section-title">Training Totals</h3>
+                <div className="stats-grid">
+                  {sportTotalEntries.map(([sport, data]) => {
+                    const label = SPORT_LABELS[sport] ?? sport;
+                    return (
+                      <div className="stat" key={sport}>
+                        <div className="stat-sport-icon" style={{ color: SPORT_COLORS[sport] }}>
+                          <SportIcon sport={sport} size={28} color="currentColor" />
+                        </div>
+                        <div className="stat-headline">
+                          <span className="stat-value">{data.count}</span>
+                          <span className="stat-label">{label}</span>
+                        </div>
+                        <div style={{ marginTop: 8, fontSize: "0.75rem", color: "var(--text-muted)" }}>
+                          {(data.total_distance / 1000).toFixed(1)} km
+                          {data.total_elevation != null && data.total_elevation > 0 && (
+                            <> · {data.total_elevation.toFixed(0)}m elev</>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
-      {filtered.length === 0 && (
-        <div className="card">
-          <div className="empty-state">
-            <div className="empty-state-image">
-              <img src={EMPTY_STATE_IMAGES.noActivities} alt="No activities" />
-            </div>
-            <h3>No activities</h3>
-            <p>{sportFilter === "all" ? "This user hasn't logged any activities yet." : `No ${sportFilter} activities yet.`}</p>
-          </div>
-        </div>
-      )}
-      {filtered.map((a, i) => (
-        <ActivityCard
-          key={a.id}
-          activity={a}
-          queryKey={["userActivities", userId]}
-          style={{ animationDelay: `${Math.min(i, 5) * 60}ms` }}
-        />
-      ))}
+            <PersonalRecordsCard records={personalRecords} />
+          </aside>
+        )}
+      </div>
     </div>
   );
 }

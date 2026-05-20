@@ -1,3 +1,6 @@
+from datetime import datetime
+from typing import Literal
+
 from pydantic import BaseModel
 
 from backend.models.activity import SportType
@@ -10,9 +13,21 @@ class StatsTotals(BaseModel):
     total_duration: int
 
 
+RecordType = Literal[
+    "longest_distance",
+    "longest_duration",
+    "fastest_pace",
+    "fastest_speed",
+    "biggest_climb",
+]
+
+
 class PersonalRecord(BaseModel):
     sport_type: SportType
-    best_time: int
+    record_type: RecordType
+    value: float
+    activity_id: int
+    achieved_at: datetime | None = None
 
 
 class StatsResponse(BaseModel):
