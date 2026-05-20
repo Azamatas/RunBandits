@@ -136,6 +136,10 @@ def list_linked_activities(
         "Listing activities linked to common %d for viewer %d (offset=%d, limit=%d)",
         common_activity_id, viewer_id, offset, limit,
     )
+
+    if not db.query(CommonActivity.id).filter(CommonActivity.id == common_activity_id).first():
+        raise NotFoundError("Common activity not found")
+
     query = _query_activities_with_relations(db).filter(
         Activity.common_activity_id == common_activity_id
     )
