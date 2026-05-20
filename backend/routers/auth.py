@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from backend.database import get_db
+from backend.exceptions import ConflictError
 from backend.schemas.auth import LoginRequest, RefreshTokenRequest, RegisterRequest, TokenResponse
 from backend.services import auth_service
 
@@ -18,7 +19,7 @@ def register(body: RegisterRequest, db: Session = Depends(get_db)):
     try:
         user = auth_service.register_user(db, body.username, body.email, body.password)
         logger.info(f"User registered successfully: {user.id}")
-    except ValueError as e:
+    except ConflictError as e:
         logger.warning(f"Registration failed: {e}")
         raise HTTPException(status_code=400, detail=str(e))
     return TokenResponse(

@@ -1,11 +1,11 @@
 import logging
 from dataclasses import dataclass
 
-from fastapi import HTTPException
 from sqlalchemy import func, select, text, update
 from sqlalchemy.orm import Session
 
 from backend.config import config
+from backend.exceptions import BadRequestError, ConflictError, NotFoundError
 from backend.models.activity import Activity
 from backend.models.common_activity import CommonActivity
 from backend.models.user import User
@@ -20,7 +20,7 @@ class CommonActivityCreateData:
     polyline: str
 
 
-def _validate_not_too_close(db: Session, sport_type: str, path_geom) -> None:
+def _is_too_close(db: Session, sport_type: str, path_geom) -> bool:
     min_meters = config.COMMON_ACTIVITY_MIN_FRECHET_DISTANCE_METERS
     too_close = (
         db.query(CommonActivity.id)
@@ -30,11 +30,7 @@ def _validate_not_too_close(db: Session, sport_type: str, path_geom) -> None:
         )
         .first()
     )
-    if too_close:
-        raise HTTPException(
-            status_code=409,
-            detail="A common activity with a very similar route already exists",
-        )
+    return too_close is not None
 
 
 def _link_existing_activities(db: Session, common_activity_id: int, sport_type: str, path_geom) -> int:
@@ -67,9 +63,10 @@ def create_common_activity(db: Session, data: CommonActivityCreateData) -> Commo
         {"poly": polyline},
     )
     if path_geom is None:
-        raise HTTPException(status_code=422, detail="Invalid polyline — could not decode")
+        raise BadRequestError("Invalid polyline — could not decode")
 
-    _validate_not_too_close(db, sport_type, path_geom)
+    if _is_too_close(db, sport_type, path_geom):
+        raise ConflictError("A common activity with a very similar route already exists")
 
     ca = CommonActivity(name=data.name, sport_type=sport_type, polyline=polyline)
     db.add(ca)
@@ -106,9 +103,12 @@ def link_activity_to_closest_common(db: Session, activity: Activity) -> None:
         logger.info("Activity %d auto-linked to common activity %d", activity.id, closest.id)
 
 
-def get_common_activity(db: Session, common_activity_id: int) -> CommonActivity | None:
+def get_common_activity(db: Session, common_activity_id: int) -> CommonActivity:
     logger.debug("Fetching common activity by ID: %d", common_activity_id)
-    return db.query(CommonActivity).filter(CommonActivity.id == common_activity_id).first()
+    ca = db.query(CommonActivity).filter(CommonActivity.id == common_activity_id).first()
+    if not ca:
+        raise NotFoundError("Common activity not found")
+    return ca
 
 
 def list_common_activities(

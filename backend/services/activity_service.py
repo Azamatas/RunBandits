@@ -8,6 +8,7 @@ from sqlalchemy import and_, or_, select
 from sqlalchemy.orm import Query, Session, selectinload
 from sqlalchemy.sql.selectable import CompoundSelect
 
+from backend.exceptions import NotFoundError
 from backend.models.activity import Activity, SportType, Visibility
 from backend.models.friendship import Friendship, FriendshipStatus
 from backend.models.user import User
@@ -119,16 +120,16 @@ def create_activity(db: Session, owner_id: int, data: ActivityCreateData, tagged
     return activity
 
 
-def get_activity(db: Session, activity_id: int, viewer_id: int | None) -> Activity | None:
+def get_activity(db: Session, activity_id: int, viewer_id: int | None) -> Activity:
     logger.debug(f"Fetching activity {activity_id} for viewer {viewer_id}")
     activity = _query_activities_with_relations(db).filter(Activity.id == activity_id).first()
-    if activity and can_view(db, activity, viewer_id):
-        return activity
-    logger.warning(f"Activity {activity_id} not found or not visible to viewer {viewer_id}")
-    return None
+    if not activity or not can_view(db, activity, viewer_id):
+        logger.warning(f"Activity {activity_id} not found or not visible to viewer {viewer_id}")
+        raise NotFoundError("Activity not found or not visible")
+    return activity
 
 
-def update_activity(db: Session, activity_id: int, owner_id: int, updates: ActivityUpdateData) -> Activity | None:
+def update_activity(db: Session, activity_id: int, owner_id: int, updates: ActivityUpdateData) -> Activity:
     logger.info(f"Updating activity {activity_id} by owner {owner_id}")
     activity = (
         _query_activities_with_relations(db)
@@ -137,7 +138,7 @@ def update_activity(db: Session, activity_id: int, owner_id: int, updates: Activ
     )
     if not activity:
         logger.warning(f"Activity {activity_id} not found for owner {owner_id}")
-        return None
+        raise NotFoundError("Activity not found")
     for field in fields(updates):
         value = getattr(updates, field.name)
         if value is not None:
@@ -148,7 +149,7 @@ def update_activity(db: Session, activity_id: int, owner_id: int, updates: Activ
     return activity
 
 
-def delete_activity(db: Session, activity_id: int, owner_id: int) -> bool:
+def delete_activity(db: Session, activity_id: int, owner_id: int) -> None:
     logger.info(f"Deleting activity {activity_id} by owner {owner_id}")
     activity = (
         db.query(Activity)
@@ -157,11 +158,10 @@ def delete_activity(db: Session, activity_id: int, owner_id: int) -> bool:
     )
     if not activity:
         logger.warning(f"Activity {activity_id} not found for deletion by owner {owner_id}")
-        return False
+        raise NotFoundError("Activity not found")
     db.delete(activity)
     db.commit()
     logger.info(f"Deleted activity {activity_id}")
-    return True
 
 
 def list_activities(

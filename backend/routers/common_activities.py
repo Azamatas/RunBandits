@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from backend.database import get_db
+from backend.exceptions import BadRequestError, ConflictError, NotFoundError
 from backend.models.user import User
 from backend.routers.deps import get_current_user
 from backend.schemas.common_activity import (
@@ -39,21 +40,26 @@ def create_common_activity(
     current_user: User = Depends(get_current_user),
 ):
     logger.info("User %d creating common activity", current_user.id)
-    ca = common_activity_service.create_common_activity(
-        db, CommonActivityCreateData(name=body.name, sport_type=body.sport_type, polyline=body.polyline)
-    )
-    logger.info("User %d created common activity %d", current_user.id, ca.id)
-    return ca
+    try:
+        ca = common_activity_service.create_common_activity(
+            db, CommonActivityCreateData(name=body.name, sport_type=body.sport_type, polyline=body.polyline)
+        )
+        logger.info("User %d created common activity %d", current_user.id, ca.id)
+        return ca
+    except ConflictError as e:
+        raise HTTPException(status_code=409, detail=str(e))
+    except BadRequestError as e:
+        raise HTTPException(status_code=422, detail=str(e))
 
 
 @router.get("/{common_activity_id}", response_model=CommonActivityOut)
 def get_common_activity(common_activity_id: int, db: Session = Depends(get_db)):
     logger.debug("Requested common activity: %d", common_activity_id)
-    result = common_activity_service.get_common_activity(db, common_activity_id)
-    if not result:
+    try:
+        return common_activity_service.get_common_activity(db, common_activity_id)
+    except NotFoundError:
         logger.warning("Common activity %d not found", common_activity_id)
         raise HTTPException(status_code=404, detail="Common activity not found")
-    return result
 
 
 @router.get("/{common_activity_id}/leaderboard", response_model=list[LeaderboardEntry])
@@ -67,8 +73,9 @@ def get_leaderboard(
         common_activity_id,
         limit,
     )
-    exists = common_activity_service.get_common_activity(db, common_activity_id)
-    if not exists:
+    try:
+        common_activity_service.get_common_activity(db, common_activity_id)
+    except NotFoundError:
         logger.warning(
             "Common activity %d not found when fetching leaderboard", common_activity_id
         )

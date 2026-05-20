@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from backend.database import get_db
+from backend.exceptions import BadRequestError, ConflictError, NotFoundError
 from backend.models.activity import SportType
 from backend.models.user import User
 from backend.routers.deps import get_current_user
@@ -36,7 +37,7 @@ def update_me(
         )
         logger.info(f"User {current_user.id} profile updated")
         return result
-    except ValueError as e:
+    except (ConflictError, BadRequestError) as e:
         logger.warning(f"User {current_user.id} profile update failed: {e}")
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -90,11 +91,11 @@ def search_users(
 @router.get("/{user_id}", response_model=UserOut)
 def get_user(user_id: int, db: Session = Depends(get_db)):
     logger.debug(f"Requested user profile: {user_id}")
-    user = user_service.get_user(db, user_id)
-    if not user:
+    try:
+        return user_service.get_user(db, user_id)
+    except NotFoundError:
         logger.warning(f"User {user_id} not found")
         raise HTTPException(status_code=404, detail="User not found")
-    return user
 
 
 @router.get("/{user_id}/activities", response_model=list[ActivityOut])
@@ -107,13 +108,13 @@ def list_user_activities(
     current_user: User = Depends(get_current_user),
 ):
     logger.debug(f"User {current_user.id} requested activities for user {user_id}")
-    result = user_service.get_user_activities(
-        db, user_id, current_user.id, sport_type=sport_type, offset=offset, limit=limit
-    )
-    if result is None:
+    try:
+        return user_service.get_user_activities(
+            db, user_id, current_user.id, sport_type=sport_type, offset=offset, limit=limit
+        )
+    except NotFoundError:
         logger.warning(f"User {user_id} not found when fetching activities")
         raise HTTPException(status_code=404, detail="User not found")
-    return result
 
 
 @router.post("/{user_id}/friend-request", status_code=201)
@@ -124,7 +125,7 @@ def send_friend_request(
     try:
         status = user_service.send_friend_request(db, current_user.id, user_id)
         logger.info(f"Friend request status: {status}")
-    except ValueError as e:
+    except (ConflictError, BadRequestError) as e:
         logger.warning(f"Friend request failed: {e}")
         raise HTTPException(status_code=400, detail=str(e))
     return {"status": status}
@@ -138,7 +139,7 @@ def accept_friend_request(
     try:
         status = user_service.accept_friend_request(db, current_user.id, user_id)
         logger.info(f"Accept friend request status: {status}")
-    except LookupError as e:
+    except NotFoundError as e:
         logger.warning(f"Accept friend request failed: {e}")
         raise HTTPException(status_code=404, detail=str(e))
     return {"status": status}
@@ -152,6 +153,6 @@ def remove_friend(
     try:
         user_service.remove_friend(db, current_user.id, user_id)
         logger.info(f"User {current_user.id} removed friend {user_id}")
-    except LookupError as e:
+    except NotFoundError as e:
         logger.warning(f"Remove friend failed: {e}")
         raise HTTPException(status_code=404, detail=str(e))

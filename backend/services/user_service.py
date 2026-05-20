@@ -4,6 +4,7 @@ from dataclasses import dataclass, fields
 from sqlalchemy import or_, select
 from sqlalchemy.orm import Session
 
+from backend.exceptions import BadRequestError, ConflictError, NotFoundError
 from backend.models.activity import Activity, Visibility
 from backend.models.friendship import Friendship, FriendshipStatus
 from backend.models.user import User
@@ -14,9 +15,12 @@ from backend.services.activity_service import enrich_activity
 logger = logging.getLogger("runbanditsrun.services.user")
 
 
-def get_user(db: Session, user_id: int) -> User | None:
+def get_user(db: Session, user_id: int) -> User:
     logger.debug(f"Fetching user by ID: {user_id}")
-    return db.query(User).filter(User.id == user_id).first()
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise NotFoundError("User not found")
+    return user
 
 
 @dataclass
@@ -32,7 +36,7 @@ def update_user(db: Session, current_user: User, updates: UserUpdateData) -> Use
         existing = auth_service.get_user_by_username(db, updates.username)
         if existing:
             logger.warning(f"Username {updates.username} already taken by user {existing.id}")
-            raise ValueError("Username already taken")
+            raise ConflictError("Username already taken")
     for field in fields(updates):
         value = getattr(updates, field.name)
         if value is not None:
@@ -144,7 +148,7 @@ def send_friend_request(db: Session, current_user_id: int, target_user_id: int) 
     )
     if current_user_id == target_user_id:
         logger.warning(f"User {current_user_id} attempted to send friend request to themselves")
-        raise ValueError("Cannot send friend request to yourself")
+        raise BadRequestError("Cannot send friend request to yourself")
     existing = (
         db.query(Friendship)
         .filter(
@@ -156,7 +160,7 @@ def send_friend_request(db: Session, current_user_id: int, target_user_id: int) 
         logger.warning(
             f"User {current_user_id} already has a request pending for user {target_user_id}"
         )
-        raise ValueError("Request already sent")
+        raise ConflictError("Request already sent")
     db.add(Friendship(requester_id=current_user_id, addressee_id=target_user_id))
     db.commit()
     logger.info(f"User {current_user_id} sent friend request to user {target_user_id}")
@@ -178,7 +182,7 @@ def accept_friend_request(db: Session, current_user_id: int, requester_id: int) 
         logger.warning(
             f"No pending friend request found from user {requester_id} to user {current_user_id}"
         )
-        raise LookupError("No pending request")
+        raise NotFoundError("No pending request")
     friendship.status = FriendshipStatus.ACCEPTED
     db.commit()
     logger.info(f"User {current_user_id} accepted friend request from user {requester_id}")
@@ -205,7 +209,7 @@ def remove_friend(db: Session, current_user_id: int, target_user_id: int) -> Non
         logger.warning(
             f"No friendship found between user {current_user_id} and user {target_user_id}"
         )
-        raise LookupError("No friendship found")
+        raise NotFoundError("No friendship found")
     db.delete(friendship)
     db.commit()
     logger.info(f"User {current_user_id} removed friend {target_user_id}")
@@ -213,12 +217,11 @@ def remove_friend(db: Session, current_user_id: int, target_user_id: int) -> Non
 
 def get_user_activities(
     db: Session, user_id: int, viewer_id: int, sport_type=None, offset: int = 0, limit: int = 20
-) -> list[dict] | None:
+) -> list[dict]:
     logger.debug(f"Fetching activities for user {user_id} viewed by user {viewer_id}")
     target = db.query(User).filter(User.id == user_id).first()
     if not target:
-        logger.warning(f"User {user_id} not found")
-        return None
+        raise NotFoundError("User not found")
     if user_id == viewer_id:
         visibility_filter = Activity.owner_id == viewer_id
     else:

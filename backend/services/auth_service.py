@@ -7,6 +7,7 @@ from jose import jwt
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from backend.exceptions import ConflictError, UnauthorizedError
 from backend.models.user import User
 
 logger = logging.getLogger("runbanditsrun.services.auth")
@@ -50,7 +51,7 @@ def decode_access_token(token: str) -> dict:
     payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
     if payload.get("type") != "access":
         logger.warning("Invalid token type: expected access")
-        raise ValueError("Invalid token type: expected access")
+        raise UnauthorizedError("Invalid token type: expected access")
     return payload
 
 
@@ -58,7 +59,7 @@ def decode_refresh_token(token: str) -> dict:
     payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
     if payload.get("type") != "refresh":
         logger.warning("Invalid token type: expected refresh")
-        raise ValueError("Invalid token type: expected refresh")
+        raise UnauthorizedError("Invalid token type: expected refresh")
     return payload
 
 
@@ -88,9 +89,9 @@ def register_user(db: Session, username: str, email: str, password: str) -> User
         msg = str(e.orig) if e.orig else ""
         if "email" in msg.lower():
             logger.warning(f"Registration failed: email {email} already registered")
-            raise ValueError("Email already registered")
+            raise ConflictError("Email already registered")
         logger.warning(f"Registration failed: username {username} already taken")
-        raise ValueError("Username already taken")
+        raise ConflictError("Username already taken")
     db.refresh(user)
     logger.info(f"User registered successfully with ID: {user.id}")
     return user

@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from backend.database import get_db
+from backend.exceptions import NotFoundError
 from backend.models.activity import SportType
 from backend.models.user import User
 from backend.routers.deps import get_current_user
@@ -62,11 +63,12 @@ def get_activity(
     activity_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)
 ):
     logger.debug(f"User {current_user.id} requested activity {activity_id}")
-    activity = activity_service.get_activity(db, activity_id, current_user.id)
-    if not activity:
+    try:
+        activity = activity_service.get_activity(db, activity_id, current_user.id)
+        return activity_service.enrich_activity(activity, current_user.id)
+    except NotFoundError:
         logger.warning(f"Activity {activity_id} not found or not visible to user {current_user.id}")
         raise HTTPException(status_code=404, detail="Activity not found or not visible")
-    return activity_service.enrich_activity(activity, current_user.id)
 
 
 @router.patch("/{activity_id}", response_model=ActivityOut)
@@ -77,24 +79,25 @@ def update_activity(
     current_user: User = Depends(get_current_user),
 ):
     logger.info(f"User {current_user.id} updating activity {activity_id}")
-    activity = activity_service.update_activity(
-        db, activity_id, current_user.id,
-        ActivityUpdateData(
-            title=body.title,
-            sport_type=body.sport_type,
-            distance=body.distance,
-            duration=body.duration,
-            elevation=body.elevation,
-            polyline=body.polyline,
-            visibility=body.visibility,
-            started_at=body.started_at,
-        ),
-    )
-    if not activity:
+    try:
+        activity = activity_service.update_activity(
+            db, activity_id, current_user.id,
+            ActivityUpdateData(
+                title=body.title,
+                sport_type=body.sport_type,
+                distance=body.distance,
+                duration=body.duration,
+                elevation=body.elevation,
+                polyline=body.polyline,
+                visibility=body.visibility,
+                started_at=body.started_at,
+            ),
+        )
+        logger.info(f"User {current_user.id} updated activity {activity_id}")
+        return activity_service.enrich_activity(activity, current_user.id)
+    except NotFoundError:
         logger.warning(f"Activity {activity_id} not found for update by user {current_user.id}")
         raise HTTPException(status_code=404, detail="Activity not found")
-    logger.info(f"User {current_user.id} updated activity {activity_id}")
-    return activity_service.enrich_activity(activity, current_user.id)
 
 
 @router.delete("/{activity_id}", status_code=204)
@@ -102,7 +105,9 @@ def delete_activity(
     activity_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)
 ):
     logger.info(f"User {current_user.id} deleting activity {activity_id}")
-    if not activity_service.delete_activity(db, activity_id, current_user.id):
+    try:
+        activity_service.delete_activity(db, activity_id, current_user.id)
+        logger.info(f"User {current_user.id} deleted activity {activity_id}")
+    except NotFoundError:
         logger.warning(f"Activity {activity_id} not found for deletion by user {current_user.id}")
         raise HTTPException(status_code=404, detail="Activity not found")
-    logger.info(f"User {current_user.id} deleted activity {activity_id}")

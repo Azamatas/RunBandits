@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from backend.database import get_db
+from backend.exceptions import ConflictError, NotFoundError
 from backend.models.user import User
 from backend.routers.deps import get_current_user
 from backend.services import kudos_service
@@ -22,10 +23,10 @@ def give_kudos(
         result = kudos_service.give_kudos(db, activity_id, current_user.id)
         logger.info(f"User {current_user.id} gave kudos to activity {activity_id}")
         return result
-    except LookupError as e:
+    except NotFoundError as e:
         logger.warning(f"Kudos failed: {e}")
         raise HTTPException(status_code=404, detail=str(e))
-    except ValueError as e:
+    except ConflictError as e:
         logger.warning(f"Kudos failed: {e}")
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -38,6 +39,6 @@ def remove_kudos(
     try:
         kudos_service.remove_kudos(db, activity_id, current_user.id)
         logger.info(f"User {current_user.id} removed kudos from activity {activity_id}")
-    except LookupError:
+    except NotFoundError:
         logger.warning(f"Kudos not found for activity {activity_id} by user {current_user.id}")
         raise HTTPException(status_code=404, detail="Kudos not found")
