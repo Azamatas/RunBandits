@@ -66,7 +66,7 @@ export default function CreateCommonActivity() {
   return (
     <div className="page">
       <h2 className="section-title" style={{ marginBottom: 24 }}>
-        Create Common Activity
+        Plan a Heist
       </h2>
 
       <div className="card">
@@ -124,10 +124,10 @@ export default function CreateCommonActivity() {
           >
             {mutation.isPending ? (
               <>
-                <div className="spinner" /> Creating...
+                <div className="spinner" /> Planning...
               </>
             ) : (
-              "Create Common Activity"
+              "Plan Heist"
             )}
           </button>
         </form>

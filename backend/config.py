@@ -20,7 +20,7 @@ class Config:
 
     # Fréchet distance thresholds for common activity creation and auto-linking
     COMMON_ACTIVITY_MIN_FRECHET_DISTANCE_METERS = float(os.environ.get("COMMON_ACTIVITY_MIN_FRECHET_DISTANCE_METERS", "100.0"))
-    COMMON_ACTIVITY_LINK_FRECHET_DISTANCE_METERS = float(os.environ.get("COMMON_ACTIVITY_LINK_FRECHET_DISTANCE_METERS", "50.0"))
+    COMMON_ACTIVITY_LINK_FRECHET_DISTANCE_METERS = float(os.environ.get("COMMON_ACTIVITY_LINK_FRECHET_DISTANCE_METERS", "100.0"))
 
 
 config = Config()

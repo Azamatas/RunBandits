@@ -87,10 +87,12 @@ def get_leaderboard(
     common_activity_id: int,
     limit: int = Query(10, ge=1, le=100),
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
     logger.debug(
-        "Requested leaderboard for common activity %d with limit=%d",
+        "Requested leaderboard for common activity %d (viewer=%d, limit=%d)",
         common_activity_id,
+        current_user.id,
         limit,
     )
     try:
@@ -100,4 +102,6 @@ def get_leaderboard(
             "Common activity %d not found when fetching leaderboard", common_activity_id
         )
         raise HTTPException(status_code=404, detail="Common activity not found")
-    return common_activity_service.get_leaderboard(db, common_activity_id, limit=limit)
+    return common_activity_service.get_leaderboard(
+        db, common_activity_id, viewer_id=current_user.id, limit=limit
+    )

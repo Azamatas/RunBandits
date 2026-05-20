@@ -102,7 +102,7 @@ export default function AddActivity() {
 
   return (
     <div className="page">
-      <h2 className="section-title" style={{ marginBottom: 24 }}>Add Activity</h2>
+      <h2 className="section-title" style={{ marginBottom: 24 }}>New Adventure</h2>
 
       <div className="card">
         <form onSubmit={handleSubmit}>

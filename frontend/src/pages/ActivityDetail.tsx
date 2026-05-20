@@ -195,7 +195,7 @@ export default function ActivityDetail() {
               {hasKudos ? "Kudos Given" : "Give Kudos"} ({activity.kudos_count})
             </button>
           ) : (
-            <span className="kudos-btn active" style={{ cursor: "default" }}>
+            <span className="kudos-btn" style={{ cursor: "default" }}>
               <KudosIcon size={16} color="currentColor" />
               {activity.kudos_count} kudos
             </span>

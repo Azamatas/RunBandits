@@ -39,6 +39,7 @@
   --sport-hike: #a16207;
 
   --font: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-heading: 'Fredoka', 'Inter', system-ui, sans-serif;
   --text-xs: 0.75rem;
   --text-sm: 0.8125rem;
   --text-base: 0.9375rem;
@@ -83,7 +84,8 @@ body {
 
 a { color: inherit; text-decoration: none; }
 
-h1, h2, h3, h4 { line-height: 1.25; letter-spacing: -0.02em; }
+h1, h2, h3, h4 { line-height: 1.25; letter-spacing: -0.01em; font-family: var(--font-heading); font-weight: 600; }
+.section-title, .navbar-brand { font-family: var(--font-heading); }
 
 
 .page { max-width: var(--page-max); margin: 0 auto; padding: 24px 16px; }

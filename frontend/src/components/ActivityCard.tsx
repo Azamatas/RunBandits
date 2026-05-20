@@ -149,7 +149,7 @@ export default function ActivityCard({ activity, queryKey, style }: ActivityCard
               <span>({activity.kudos_count})</span>
             </button>
           ) : (
-            <span className="kudos-btn active" style={{ cursor: "default" }}>
+            <span className="kudos-btn" style={{ cursor: "default" }}>
               <KudosIcon size={16} color="currentColor" />
               <span>{activity.kudos_count} kudos</span>
             </span>

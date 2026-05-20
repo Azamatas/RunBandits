@@ -101,8 +101,8 @@ export default function Social() {
     <div className="page social-page">
       <div className="social-hero" style={{ backgroundImage: `url(${HERO_IMAGES.explore})` }}>
         <div className="social-hero-overlay">
-          <h2>Social</h2>
-          <p>Connect with friends</p>
+          <h2>Crew</h2>
+          <p>Find your crew of bandits</p>
         </div>
       </div>
 

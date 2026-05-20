@@ -47,12 +47,33 @@ export function SearchIcon({ size = 20, color = "currentColor" }) {
 
 export function LogoIcon({ size = 28 }) {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width={size} height={size} fill="none">
-      <circle cx="16" cy="16" r="15" fill="var(--accent)" />
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width={size} height={size}>
+      {/* Ears */}
+      <path d="M5 9 L9 2 L13 10 Z" fill="#e8651b" />
+      <path d="M27 9 L23 2 L19 10 Z" fill="#e8651b" />
+      {/* Inner ear */}
+      <path d="M7.5 8 L9 4 L11 8.5 Z" fill="#7a2c08" />
+      <path d="M24.5 8 L23 4 L21 8.5 Z" fill="#7a2c08" />
+      {/* Head */}
+      <circle cx="16" cy="17" r="11" fill="#f47925" />
+      {/* White muzzle */}
+      <ellipse cx="16" cy="22" rx="6" ry="4.5" fill="#ffffff" />
+      {/* Blue bandit mask */}
       <path
-        d="M17.5 9.5c1 0 1.8-.8 1.8-1.8s-.8-1.8-1.8-1.8-1.8.8-1.8 1.8.8 1.8 1.8 1.8zM14 12.3l-2.5 12.7h1.9l1.6-7.2 1.9 1.8v5.4h1.8v-6.7l-1.9-1.8.5-2.7c1.1 1.3 2.7 2.2 4.5 2.2v-1.8c-1.7 0-3.1-.9-3.9-2.2l-.9-1.4c-.3-.5-.9-.9-1.5-.9-.3 0-.5.1-.7.1L10 11.5V16h1.8v-3l2.2-.7"
-        fill="#fff"
+        d="M4 13.5 Q10 11.5 16 13.5 Q22 11.5 28 13.5 L27 17.5 Q22 18.5 16 17 Q10 18.5 5 17.5 Z"
+        fill="#1e6cd9"
+        stroke="#0a3a8a"
+        strokeWidth="0.4"
       />
+      {/* Eyes */}
+      <circle cx="11" cy="15.5" r="1.3" fill="#ffffff" />
+      <circle cx="21" cy="15.5" r="1.3" fill="#ffffff" />
+      <circle cx="11" cy="15.5" r="0.6" fill="#0a0a0a" />
+      <circle cx="21" cy="15.5" r="0.6" fill="#0a0a0a" />
+      {/* Nose */}
+      <ellipse cx="16" cy="20" rx="1.4" ry="1.1" fill="#1a0d05" />
+      {/* Mouth */}
+      <path d="M14 22.5 Q16 24 18 22.5" stroke="#1a0d05" strokeWidth="0.7" fill="none" strokeLinecap="round" />
     </svg>
   );
 }

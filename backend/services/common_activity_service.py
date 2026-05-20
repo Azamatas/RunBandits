@@ -150,14 +150,19 @@ def list_linked_activities(
     return [enrich_activity(a, viewer_id) for a in activities]
 
 
-def get_leaderboard(db: Session, common_activity_id: int, limit: int = 10) -> list[dict]:
+def get_leaderboard(
+    db: Session, common_activity_id: int, viewer_id: int, limit: int = 10
+) -> list[dict]:
+    from backend.services.activity_service import _filter_visible_activities
+
     logger.debug(
-        "Generating leaderboard for common activity %d with limit=%d",
+        "Generating leaderboard for common activity %d (viewer=%d, limit=%d)",
         common_activity_id,
+        viewer_id,
         limit,
     )
 
-    results = (
+    query = (
         db.query(
             User.id.label("athlete_id"),
             User.username.label("athlete_name"),
@@ -166,7 +171,10 @@ def get_leaderboard(db: Session, common_activity_id: int, limit: int = 10) -> li
         .join(User, User.id == Activity.owner_id)
         .join(CommonActivity, CommonActivity.id == Activity.common_activity_id)
         .filter(CommonActivity.id == common_activity_id, Activity.duration.isnot(None))
-        .group_by(User.id, User.username)
+    )
+    query = _filter_visible_activities(query, viewer_id)
+    results = (
+        query.group_by(User.id, User.username)
         .order_by(func.min(Activity.duration))
         .limit(limit)
         .all()

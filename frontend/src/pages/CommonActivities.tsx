@@ -12,9 +12,9 @@ export default function CommonActivities() {
   return (
     <div className="page">
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
-        <h2 className="section-title" style={{ margin: 0 }}>Common Activities</h2>
+        <h2 className="section-title" style={{ margin: 0 }}>Heists</h2>
         <Link to="/add-common-activity" className="btn-primary">
-          + Create Common Activity
+          + Plan a Heist
         </Link>
       </div>
 
@@ -22,7 +22,7 @@ export default function CommonActivities() {
         <p style={{ color: "var(--text-muted)" }}>Loading...</p>
       ) : items.length === 0 ? (
         <p style={{ color: "var(--text-muted)" }}>
-          No common activities yet. Create one to define a shared route athletes can attempt.
+          No heists yet. Plan one to define a shared route the crew can attempt.
         </p>
       ) : (
         <div className="friends-grid">
