@@ -9,6 +9,8 @@ from backend.exceptions import ConflictError, NotFoundError
 from backend.models.activity import Activity
 from backend.models.common_activity import CommonActivity
 from backend.models.user import User
+from backend.schemas.activity import ActivityOut
+from backend.schemas.common_activity import LeaderboardEntry
 
 logger = logging.getLogger("runbanditsrun.services.common_activity")
 
@@ -123,7 +125,7 @@ def list_linked_activities(
     viewer_id: int,
     limit: int = 20,
     offset: int = 0,
-) -> list[dict]:
+) -> list[ActivityOut]:
     from backend.services.activity_service import (
         _filter_visible_activities,
         _query_activities_with_relations,
@@ -142,7 +144,7 @@ def list_linked_activities(
     return [enrich_activity(a, viewer_id) for a in activities]
 
 
-def get_leaderboard(db: Session, common_activity_id: int, limit: int = 10) -> list[dict]:
+def get_leaderboard(db: Session, common_activity_id: int, limit: int = 10) -> list[LeaderboardEntry]:
     logger.debug(
         "Generating leaderboard for common activity %d with limit=%d",
         common_activity_id,
@@ -165,11 +167,11 @@ def get_leaderboard(db: Session, common_activity_id: int, limit: int = 10) -> li
     )
 
     return [
-        {
-            "athlete_id": r.athlete_id,
-            "athlete_name": r.athlete_name,
-            "best_time": r.best_time,
-            "rank": idx + 1,
-        }
+        LeaderboardEntry(
+            athlete_id=r.athlete_id,
+            athlete_name=r.athlete_name,
+            best_time=r.best_time,
+            rank=idx + 1,
+        )
         for idx, r in enumerate(results)
     ]

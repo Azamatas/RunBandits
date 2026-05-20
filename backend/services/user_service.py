@@ -8,6 +8,7 @@ from backend.exceptions import BadRequestError, ConflictError, NotFoundError
 from backend.models.activity import Activity, Visibility
 from backend.models.friendship import Friendship, FriendshipStatus
 from backend.models.user import User
+from backend.schemas.activity import ActivityOut
 from backend.schemas.friendship import FriendRequestOut, SentFriendRequestOut
 from backend.services import auth_service
 from backend.services.activity_service import enrich_activity
@@ -217,7 +218,7 @@ def remove_friend(db: Session, current_user_id: int, target_user_id: int) -> Non
 
 def get_user_activities(
     db: Session, user_id: int, viewer_id: int, sport_type=None, offset: int = 0, limit: int = 20
-) -> list[dict]:
+) -> list[ActivityOut]:
     logger.debug(f"Fetching activities for user {user_id} viewed by user {viewer_id}")
     target = db.query(User).filter(User.id == user_id).first()
     if not target:
