@@ -1,11 +1,11 @@
 import logging
 from dataclasses import dataclass
 
-from sqlalchemy import func, select, text, update
+from sqlalchemy import func, select, update
 from sqlalchemy.orm import Session
 
 from backend.config import config
-from backend.exceptions import BadRequestError, ConflictError, NotFoundError
+from backend.exceptions import ConflictError, NotFoundError
 from backend.models.activity import Activity
 from backend.models.common_activity import CommonActivity
 from backend.models.user import User
@@ -18,19 +18,6 @@ class CommonActivityCreateData:
     name: str
     sport_type: str
     polyline: str
-
-
-def _is_too_close(db: Session, sport_type: str, path_geom) -> bool:
-    min_meters = config.COMMON_ACTIVITY_MIN_FRECHET_DISTANCE_METERS
-    too_close = (
-        db.query(CommonActivity.id)
-        .filter(
-            CommonActivity.sport_type == sport_type,
-            func.ST_FrechetDistance(CommonActivity.path, path_geom) < min_meters,
-        )
-        .first()
-    )
-    return too_close is not None
 
 
 def _link_existing_activities(db: Session, common_activity_id: int, sport_type: str, path_geom) -> int:
@@ -58,21 +45,26 @@ def create_common_activity(db: Session, data: CommonActivityCreateData) -> Commo
     sport_type = data.sport_type
     polyline = data.polyline
 
-    path_geom = db.scalar(
-        text("SELECT ST_Transform(ST_LineFromEncodedPolyline(:poly), 3857)"),
-        {"poly": polyline},
-    )
-    if path_geom is None:
-        raise BadRequestError("Invalid polyline — could not decode")
-
-    if _is_too_close(db, sport_type, path_geom):
-        raise ConflictError("A common activity with a very similar route already exists")
-
     ca = CommonActivity(name=data.name, sport_type=sport_type, polyline=polyline)
     db.add(ca)
     db.flush()
+    db.refresh(ca)
 
-    linked_count = _link_existing_activities(db, ca.id, sport_type, path_geom)
+    min_meters = config.COMMON_ACTIVITY_MIN_FRECHET_DISTANCE_METERS
+    too_close = (
+        db.query(CommonActivity.id)
+        .filter(
+            CommonActivity.sport_type == sport_type,
+            CommonActivity.id != ca.id,
+            func.ST_FrechetDistance(CommonActivity.path, ca.path) < min_meters,
+        )
+        .first()
+    )
+    if too_close:
+        db.rollback()
+        raise ConflictError("A common activity with a very similar route already exists")
+
+    linked_count = _link_existing_activities(db, ca.id, sport_type, ca.path)
     if linked_count:
         logger.info(
             "Common activity %d linked %d existing activities", ca.id, linked_count
