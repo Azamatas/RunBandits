@@ -41,6 +41,9 @@ export default function NavBar() {
             <NavLink to="/common-activities" className={({ isActive }) => `nav-link${isActive ? " active" : ""}`}>
               <span>Heists</span>
             </NavLink>
+            <NavLink to="/segments" className={({ isActive }) => `nav-link${isActive ? " active" : ""}`}>
+              <span>Segments</span>
+            </NavLink>
             <NavLink to="/add-activity" className={({ isActive }) => `nav-link nav-log-btn${isActive ? " active" : ""}`}>
               <span className="nav-log-plus" aria-hidden="true">+</span>
               <span>New Adventure</span>

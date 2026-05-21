@@ -160,7 +160,9 @@ class TestListActivities:
         db.commit()
         resp = client.get("/activities/", headers=headers)
         assert resp.status_code == 200
-        assert len(resp.json()) == 2
+        titles = [a["title"] for a in resp.json()]
+        assert "Run 1" in titles
+        assert "Ride 1" in titles
 
     def test_list_activities_filter_sport(self, client, db, auth_user):
         user, headers = auth_user

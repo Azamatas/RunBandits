@@ -117,3 +117,34 @@ export interface LoginRequest {
   email: string;
   password: string;
 }
+
+export interface Segment {
+  id: number;
+  name: string;
+  polyline: string | null;
+  distance: number | null;
+  created_at: string;
+}
+
+export interface SegmentCreatePayload {
+  name: string;
+  polyline: string;
+  distance?: number | null;
+}
+
+export interface SegmentLeaderboardEntry {
+  athlete_id: number;
+  athlete_name: string;
+  best_time: number;
+  rank: number;
+  activity_id: number | null;
+}
+
+export interface SegmentEffort {
+  id: number;
+  segment_id: number;
+  activity_id: number;
+  athlete_id: number;
+  elapsed_time: number;
+  started_at: string | null;
+}
