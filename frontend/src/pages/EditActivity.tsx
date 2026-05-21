@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getActivity, updateActivity } from "../api/activities";
 import type { Activity, ActivityUpdatePayload, Visibility } from "../types/api";
+import RouteBuilder from "../components/RouteBuilder";
 
 function apiError(err: any, fallback: string): string {
   const detail = err?.response?.data?.detail;
@@ -24,11 +25,15 @@ export default function EditActivity() {
     queryFn: () => getActivity(id!),
   });
 
-  const [form, setForm] = useState<{ title: string; visibility: Visibility }>({ title: "", visibility: "public" });
+  const [form, setForm] = useState<{ title: string; visibility: Visibility; polyline: string | null }>({
+    title: "",
+    visibility: "public",
+    polyline: null,
+  });
 
   useEffect(() => {
     if (activity) {
-      setForm({ title: activity.title, visibility: activity.visibility });
+      setForm({ title: activity.title, visibility: activity.visibility, polyline: activity.polyline ?? null });
     }
   }, [activity]);
 
@@ -44,13 +49,15 @@ export default function EditActivity() {
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!form.title.trim()) return;
-    mutation.mutate(form);
+    const payload: ActivityUpdatePayload = { title: form.title, visibility: form.visibility };
+    if (form.polyline !== (activity?.polyline ?? null)) payload.polyline = form.polyline;
+    mutation.mutate(payload);
   }
 
   if (isLoading) {
     return (
       <div className="page">
-        <div className="skeleton" style={{ height: 200, borderRadius: "var(--radius-lg)" }} />
+        <div className="skeleton" style={{ height: 480, borderRadius: "var(--radius-lg)" }} />
       </div>
     );
   }
@@ -58,6 +65,14 @@ export default function EditActivity() {
   return (
     <div className="page">
       <h2 className="section-title" style={{ marginBottom: 24 }}>Edit Activity</h2>
+
+      <div style={{ marginBottom: 20 }}>
+        <RouteBuilder
+          key={activity?.id}
+          initialPolyline={activity?.polyline ?? undefined}
+          onChange={(pl) => setForm((f) => ({ ...f, polyline: pl || null }))}
+        />
+      </div>
 
       <div className="card">
         <form onSubmit={handleSubmit}>

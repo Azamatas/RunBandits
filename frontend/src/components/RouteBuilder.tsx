@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { MapContainer, TileLayer, Polyline, Marker, Popup, useMap, useMapEvents } from "react-leaflet";
 import polylineCodec from "@mapbox/polyline";
 import L from "leaflet";
@@ -15,11 +15,15 @@ interface RouteBuilderProps {
   onDistance?: (km: number) => void;
   onDuration?: (totalMinutes: number) => void;
   paceMinPerKm?: number | null;
+  initialPolyline?: string;
 }
 
+const DEFAULT_PACE_MIN_PER_KM = 5;
+
 function paceTimeFor(km: number, paceMinPerKm: number | null | undefined): string {
-  if (!paceMinPerKm || paceMinPerKm <= 0 || km <= 0) return "";
-  return String(Math.round(km * paceMinPerKm * 10) / 10);
+  if (km <= 0) return "";
+  const pace = paceMinPerKm && paceMinPerKm > 0 ? paceMinPerKm : DEFAULT_PACE_MIN_PER_KM;
+  return String(Math.round(km * pace * 10) / 10);
 }
 
 function haversineKm([lat1, lon1]: LatLng, [lat2, lon2]: LatLng): number {
@@ -71,7 +75,7 @@ function ClickHandler({ onAdd }: { onAdd: (pt: LatLng) => void }) {
 function Recenter({ center, trigger }: { center: LatLng; trigger: number }) {
   const map = useMap();
   useEffect(() => {
-    map.setView(center, map.getZoom());
+    map.setView(center, map.getZoom(), { animate: false });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [trigger]);
   return null;
@@ -84,26 +88,145 @@ function fmtTime(totalMinutes: number): string {
 }
 
 const ACCENT = "var(--accent, #fc4c02)";
+const ACCENT_HEX = "#fc4c02";
 const START_COLOR = "#16a34a";
 
-export default function RouteBuilder({ onChange, onDistance, onDuration, paceMinPerKm }: RouteBuilderProps) {
+const MID_ICON = L.divIcon({
+  className: "rb-midpoint",
+  html: `<div style="width:20px;height:20px;display:flex;align-items:center;justify-content:center;"><div style="width:7px;height:7px;background:#fff;border-radius:50%;border:2px solid ${ACCENT_HEX};box-shadow:0 1px 4px rgba(0,0,0,0.3);"></div></div>`,
+  iconSize: [20, 20],
+  iconAnchor: [10, 10],
+});
+
+function MidpointDragger({
+  position,
+  onInsert,
+  onMove,
+}: {
+  position: LatLng;
+  onInsert: (pt: LatLng) => void;
+  onMove: (pt: LatLng) => void;
+}) {
+  const map = useMap();
+  return (
+    <Marker
+      position={position}
+      icon={MID_ICON}
+      eventHandlers={{
+        mousedown: (e) => {
+          L.DomEvent.stop(e);
+          map.dragging.disable();
+          onInsert(position);
+          const handleMove = (me: L.LeafletMouseEvent) => onMove([me.latlng.lat, me.latlng.lng]);
+          const handleUp = () => {
+            map.off("mousemove", handleMove);
+            map.off("mouseup", handleUp);
+            map.dragging.enable();
+          };
+          map.on("mousemove", handleMove);
+          map.on("mouseup", handleUp);
+        },
+      }}
+    />
+  );
+}
+
+function LineDragger({
+  positions,
+  onInsert,
+  onMove,
+}: {
+  positions: [LatLng, LatLng];
+  onInsert: (pt: LatLng) => void;
+  onMove: (pt: LatLng) => void;
+}) {
+  const map = useMap();
+  return (
+    <Polyline
+      positions={positions}
+      pathOptions={{ color: ACCENT, weight: 5, opacity: 0.85 }}
+      bubblingMouseEvents={false}
+      eventHandlers={{
+        mousedown: (e) => {
+          L.DomEvent.stop(e);
+          map.dragging.disable();
+          // Insert immediately so the lines start following the cursor right away.
+          onInsert([e.latlng.lat, e.latlng.lng]);
+          const handleMove = (me: L.LeafletMouseEvent) => onMove([me.latlng.lat, me.latlng.lng]);
+          const handleUp = () => {
+            map.off("mousemove", handleMove);
+            map.off("mouseup", handleUp);
+            map.dragging.enable();
+          };
+          map.on("mousemove", handleMove);
+          map.on("mouseup", handleUp);
+        },
+        mouseover: (e) => e.target.setStyle({ weight: 7, opacity: 1 }),
+        mouseout: (e) => e.target.setStyle({ weight: 5, opacity: 0.85 }),
+      }}
+    />
+  );
+}
+
+export default function RouteBuilder({ onChange, onDistance, onDuration, paceMinPerKm, initialPolyline }: RouteBuilderProps) {
   const [points, setPoints] = useState<LatLng[]>([]);
   const [legTimes, setLegTimes] = useState<string[]>([]);
   const [closed, setClosed] = useState(false);
   const [center, setCenter] = useState<LatLng>(DEFAULT_CENTER);
   const [recenterTrigger, setRecenterTrigger] = useState(0);
+  const [locating, setLocating] = useState(!initialPolyline && !localStorage.getItem(ROUTE_DRAFT_KEY));
+
+  const stateRef = useRef({ points: [] as LatLng[], legTimes: [] as string[], closed: false });
 
   useEffect(() => {
+    if (initialPolyline) {
+      // Edit mode: restore from the activity's own polyline.
+      try {
+        const decoded = polylineCodec.decode(initialPolyline) as LatLng[];
+        if (decoded.length >= 2) {
+          emit(decoded, Array(decoded.length - 1).fill(""), false);
+          setCenter(decoded[Math.floor(decoded.length / 2)]);
+          setRecenterTrigger((t) => t + 1);
+        }
+      } catch {}
+    } else {
+      // New-route mode: restore the full draft from localStorage so even a
+      // single point (which can't be encoded as a polyline) survives a refresh.
+      try {
+        const raw = localStorage.getItem(ROUTE_DRAFT_KEY);
+        if (!raw) return;
+        const { points: pts, legTimes: times, closed: cl } = JSON.parse(raw) as {
+          points: LatLng[];
+          legTimes: string[];
+          closed: boolean;
+        };
+        if (pts.length >= 1) {
+          emit(pts, times, cl);
+          setCenter(pts[Math.floor(pts.length / 2)]);
+          setRecenterTrigger((t) => t + 1);
+        }
+      } catch {}
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (!locating) return;
     navigator.geolocation?.getCurrentPosition(
       (pos) => {
-        setCenter([pos.coords.latitude, pos.coords.longitude]);
-        setRecenterTrigger((t) => t + 1);
+        if (stateRef.current.points.length === 0) {
+          setCenter([pos.coords.latitude, pos.coords.longitude]);
+        }
+        setLocating(false);
       },
-      () => {},
+      () => setLocating(false),
+      { enableHighAccuracy: false, timeout: 5000, maximumAge: Infinity },
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function emit(nextPoints: LatLng[], nextTimes: string[], nextClosed: boolean) {
+    stateRef.current = { points: nextPoints, legTimes: nextTimes, closed: nextClosed };
     setPoints(nextPoints);
     setLegTimes(nextTimes);
     setClosed(nextClosed);
@@ -111,7 +234,17 @@ export default function RouteBuilder({ onChange, onDistance, onDuration, paceMin
       nextClosed && nextPoints.length >= 2
         ? [...nextPoints, nextPoints[0]]
         : nextPoints;
-    onChange(encodable.length >= 2 ? polylineCodec.encode(encodable) : "");
+    const encoded = encodable.length >= 2 ? polylineCodec.encode(encodable) : "";
+    if (!initialPolyline) {
+      // Persist draft for new routes so the user doesn't lose work on refresh.
+      // Stored as JSON (not a polyline) so a single point is preserved too.
+      // Not used in edit mode — the activity's own polyline is the source of truth.
+      if (nextPoints.length > 0)
+        localStorage.setItem(ROUTE_DRAFT_KEY, JSON.stringify({ points: nextPoints, legTimes: nextTimes, closed: nextClosed }));
+      else
+        localStorage.removeItem(ROUTE_DRAFT_KEY);
+    }
+    onChange(encoded);
     onDistance?.(nextPoints.length >= 2 ? pathKm(nextPoints, nextClosed) : 0);
     onDuration?.(nextTimes.reduce((s, t) => s + (parseFloat(t) || 0), 0));
   }
@@ -122,10 +255,10 @@ export default function RouteBuilder({ onChange, onDistance, onDuration, paceMin
       const close = legTimes[legTimes.length - 1] ?? "";
       const opens = legTimes.slice(0, -1);
       emit([...points, pt], [...opens, newOpenTime, close], true);
+    } else if (points.length === 0) {
+      emit([pt], [], false);
     } else {
-      const newLegTime = points.length >= 1
-        ? paceTimeFor(haversineKm(points[points.length - 1], pt), paceMinPerKm)
-        : "";
+      const newLegTime = paceTimeFor(haversineKm(points[points.length - 1], pt), paceMinPerKm);
       emit([...points, pt], [...legTimes, newLegTime], false);
     }
   }
@@ -158,9 +291,10 @@ export default function RouteBuilder({ onChange, onDistance, onDuration, paceMin
   }
 
   function movePoint(i: number, pt: LatLng) {
-    const next = [...points];
+    const { points: p, legTimes: t, closed: c } = stateRef.current;
+    const next = [...p];
     next[i] = pt;
-    emit(next, legTimes, closed);
+    emit(next, t, c);
   }
 
   function deletePoint(i: number) {
@@ -205,6 +339,7 @@ export default function RouteBuilder({ onChange, onDistance, onDuration, paceMin
         setRecenterTrigger((t) => t + 1);
       },
       () => {},
+      { enableHighAccuracy: false, timeout: 5000, maximumAge: Infinity },
     );
   }
 
@@ -228,6 +363,14 @@ export default function RouteBuilder({ onChange, onDistance, onDuration, paceMin
     onMouseUp: (e) => e.stopPropagation(),
   };
 
+  if (locating) {
+    return (
+      <div className="map-container" style={{ height: 480, display: "flex", alignItems: "center", justifyContent: "center", background: "var(--gray-100)", borderRadius: "var(--radius-lg)", color: "var(--text-muted)", fontSize: "var(--text-sm)" }}>
+        Detecting your location…
+      </div>
+    );
+  }
+
   return (
     <div>
       <div className="map-container" style={{ height: 480, position: "relative" }}>
@@ -246,31 +389,34 @@ export default function RouteBuilder({ onChange, onDistance, onDuration, paceMin
           <Recenter center={center} trigger={recenterTrigger} />
 
           {Array.from({ length: openEdgeCount }, (_, i) => (
-            <Polyline
+            <LineDragger
               key={`seg-${i}`}
               positions={[points[i], points[i + 1]]}
-              pathOptions={{ color: ACCENT, weight: 5, opacity: 0.85 }}
-              bubblingMouseEvents={false}
-              eventHandlers={{
-                click: (e) => insertOnSegment(i, [e.latlng.lat, e.latlng.lng]),
-                mouseover: (e) => e.target.setStyle({ weight: 7, opacity: 1 }),
-                mouseout: (e) => e.target.setStyle({ weight: 5, opacity: 0.85 }),
-              }}
+              onInsert={(pt) => insertOnSegment(i, pt)}
+              onMove={(pt) => movePoint(i + 1, pt)}
             />
           ))}
 
           {closed && points.length >= 2 && (
-            <Polyline
+            <LineDragger
               positions={[points[points.length - 1], points[0]]}
-              pathOptions={{ color: ACCENT, weight: 5, opacity: 0.85 }}
-              bubblingMouseEvents={false}
-              eventHandlers={{
-                click: (e) => insertOnSegment(points.length - 1, [e.latlng.lat, e.latlng.lng]),
-                mouseover: (e) => e.target.setStyle({ weight: 7, opacity: 1 }),
-                mouseout: (e) => e.target.setStyle({ weight: 5, opacity: 0.85 }),
-              }}
+              onInsert={(pt) => insertOnSegment(points.length - 1, pt)}
+              onMove={(pt) => movePoint(points.length, pt)}
             />
           )}
+
+          {points.length >= 2 && Array.from({ length: edgeCount }, (_, i) => {
+            const j = (i + 1) % points.length;
+            const mid: LatLng = [(points[i][0] + points[j][0]) / 2, (points[i][1] + points[j][1]) / 2];
+            return (
+              <MidpointDragger
+                key={`mid-${i}-${mid[0].toFixed(5)}-${mid[1].toFixed(5)}`}
+                position={mid}
+                onInsert={(pt) => insertOnSegment(i, pt)}
+                onMove={(pt) => movePoint(i + 1, pt)}
+              />
+            );
+          })}
 
           {points.map((pt, i) => {
             const isStart = i === 0;
@@ -397,7 +543,7 @@ export default function RouteBuilder({ onChange, onDistance, onDuration, paceMin
                 <input
                   type="number"
                   min="0"
-                  step="0.5"
+                  step="any"
                   value={legTimes[i] ?? ""}
                   onChange={(e) => setLegTime(i, e.target.value)}
                   placeholder="—"
