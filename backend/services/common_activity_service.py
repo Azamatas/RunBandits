@@ -31,7 +31,7 @@ def _link_existing_activities(db: Session, common_activity_id: int, sport_type: 
             Activity.sport_type == sport_type,
             Activity.common_activity_id.is_(None),
             Activity.path.isnot(None),
-            func.ST_FrechetDistance(Activity.path, path_geom) < link_meters,
+            func.ST_FrechetDistance(Activity.path, path_geom, 0.05) < link_meters,
         )
     ).scalar_subquery()
 
@@ -58,7 +58,7 @@ def create_common_activity(db: Session, data: CommonActivityCreateData) -> Commo
         .filter(
             CommonActivity.sport_type == sport_type,
             CommonActivity.id != ca.id,
-            func.ST_FrechetDistance(CommonActivity.path, ca.path) < min_meters,
+            func.ST_FrechetDistance(CommonActivity.path, ca.path, 0.05) < min_meters,
         )
         .first()
     )
@@ -83,12 +83,12 @@ def link_activity_to_closest_common(db: Session, activity: Activity) -> None:
         return
     link_meters = config.COMMON_ACTIVITY_LINK_FRECHET_DISTANCE_METERS
     closest = (
-        db.query(CommonActivity.id, func.ST_FrechetDistance(CommonActivity.path, activity.path).label("dist"))
+        db.query(CommonActivity.id, func.ST_FrechetDistance(CommonActivity.path, activity.path, 0.05).label("dist"))
         .filter(
             CommonActivity.sport_type == activity.sport_type,
-            func.ST_FrechetDistance(CommonActivity.path, activity.path) < link_meters,
+            func.ST_FrechetDistance(CommonActivity.path, activity.path, 0.05) < link_meters,
         )
-        .order_by(func.ST_FrechetDistance(CommonActivity.path, activity.path))
+        .order_by(func.ST_FrechetDistance(CommonActivity.path, activity.path, 0.05))
         .first()
     )
     if closest:

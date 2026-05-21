@@ -6,6 +6,7 @@ import { useAuth } from "../context/AuthContext";
 import SportIcon, { KudosIcon } from "./SportIcon";
 import { SPORT_THUMBNAILS } from "../constants/images";
 import type { Activity, SportType } from "../types/api";
+import { fmtDuration as fmt } from "../utils/time";
 
 const AVATAR_COLORS = [
   "#fc4c02", "#16a34a", "#0284c7", "#9333ea", "#e11d48",
@@ -14,14 +15,6 @@ const AVATAR_COLORS = [
 
 function avatarColor(id: number) {
   return AVATAR_COLORS[id % AVATAR_COLORS.length];
-}
-
-function fmt(seconds?: number | null): string {
-  if (!seconds) return "—";
-  const h = Math.floor(seconds / 3600);
-  const m = Math.floor((seconds % 3600) / 60);
-  const s = seconds % 60;
-  return h > 0 ? `${h}h ${m}m` : `${m}m ${String(s).padStart(2, "0")}s`;
 }
 
 function timeAgo(dateStr: string): string {

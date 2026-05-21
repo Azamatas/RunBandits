@@ -1,15 +1,11 @@
 import { useAuth } from "../context/AuthContext";
+import { fmtDuration as fmt } from "../utils/time";
 
 const AVATAR_COLORS = [
   "#fc4c02", "#16a34a", "#0284c7", "#9333ea", "#e11d48",
   "#0d9488", "#a16207", "#6d28d9",
 ];
 
-function fmt(seconds) {
-  const m = Math.floor(seconds / 60);
-  const s = seconds % 60;
-  return `${m}:${String(s).padStart(2, "0")}`;
-}
 
 function Medal({ rank }) {
   if (rank === 1) return <span className="medal medal-gold">1</span>;
