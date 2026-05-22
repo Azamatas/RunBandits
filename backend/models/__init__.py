@@ -2,7 +2,6 @@ from backend.models.activity import Activity, SportType, Visibility, activity_at
 from backend.models.common_activity import CommonActivity
 from backend.models.friendship import Friendship, FriendshipStatus
 from backend.models.kudos import Kudos
-from backend.models.segment import Segment, SegmentEffort
 from backend.models.user import User
 
 __all__ = [
@@ -14,7 +13,5 @@ __all__ = [
     "Friendship",
     "FriendshipStatus",
     "Kudos",
-    "Segment",
-    "SegmentEffort",
     "User",
 ]

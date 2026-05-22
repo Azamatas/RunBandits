@@ -42,34 +42,6 @@ Table common_activities {
   }
 }
 
-Table segments {
-  id INTEGER [pk, increment]
-  name VARCHAR(200) [not null]
-  sport_type ESPORT_TYPE [not null]
-  polyline TEXT
-  path GEOMETRY(LINESTRING, 3857)
-  distance FLOAT
-
-  indexes {
-    (path) [type: GIST]
-  }
-}
-
-Table segment_efforts {
-  id INTEGER [pk, increment]
-  segment_id INTEGER [not null]
-  activity_id INTEGER [not null]
-  athlete_id INTEGER [not null]
-  elapsed_time INTEGER [not null]
-  started_at DATETIME
-
-  indexes {
-    (segment_id)
-    (activity_id)
-    (athlete_id)
-  }
-}
-
 Table friendships {
   id INTEGER [pk, increment]
   requester_id INTEGER [not null]
@@ -134,6 +106,3 @@ Ref: kudos.user_id > users.id
 Ref: activity_athletes.activity_id > activities.id
 Ref: activity_athletes.user_id > users.id
 
-Ref: segment_efforts.segment_id > segments.id
-Ref: segment_efforts.activity_id > activities.id
-Ref: segment_efforts.athlete_id > users.id

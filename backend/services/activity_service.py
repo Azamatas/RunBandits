@@ -119,8 +119,6 @@ def create_activity(db: Session, owner_id: int, data: ActivityCreateData, tagged
     db.flush()
     db.refresh(activity)
     common_activity_service.link_activity_to_closest_common(db, activity)
-    from backend.services import segment_service
-    segment_service.match_segments_for_activity(db, activity)
     db.commit()
     logger.info(f"Created activity {activity.id} for user {owner_id}")
     return activity

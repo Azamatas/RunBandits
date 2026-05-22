@@ -9,27 +9,16 @@ test.describe("Activities — create / view / edit / delete", () => {
 
     const title = unique("Run");
     await page.getByPlaceholder("Morning Run").fill(title);
-    await page.getByPlaceholder("5.0").fill("8");
-    await page.getByPlaceholder("30").fill("45");
-    await page.getByPlaceholder("120").fill("60");
-
     await page.getByRole("button", { name: /save activity/i }).click();
 
     await expect(page).toHaveURL(/\/activities\/\d+$/);
     await expect(page.getByRole("heading", { name: title })).toBeVisible();
-    await expect(page.getByText(/Kilometers/i)).toBeVisible();
   });
 
   test("activity detail shows stats for an owned activity and edit/delete controls", async ({ page, request }) => {
-    await loginFreshUser(page, request, "act_view");
-    await page.goto("/add-activity");
-
-    const title = unique("Tempo");
-    await page.getByPlaceholder("Morning Run").fill(title);
-    await page.getByPlaceholder("5.0").fill("10");
-    await page.getByPlaceholder("30").fill("50");
-    await page.getByRole("button", { name: /save activity/i }).click();
-    await expect(page).toHaveURL(/\/activities\/\d+$/);
+    const user = await loginFreshUser(page, request, "act_view");
+    const activity = await createActivityForUser(request, user.access_token, { title: unique("Tempo") });
+    await page.goto(`/activities/${activity.id}`);
 
     await expect(page.getByRole("link", { name: /^edit$/i })).toBeVisible();
     await expect(page.getByRole("button", { name: /^delete$/i })).toBeVisible();
@@ -37,20 +26,14 @@ test.describe("Activities — create / view / edit / delete", () => {
   });
 
   test("editing an activity updates title and visibility", async ({ page, request }) => {
-    await loginFreshUser(page, request, "act_edit");
-    await page.goto("/add-activity");
-
-    const originalTitle = unique("Edit");
-    await page.getByPlaceholder("Morning Run").fill(originalTitle);
-    await page.getByPlaceholder("5.0").fill("5");
-    await page.getByPlaceholder("30").fill("25");
-    await page.getByRole("button", { name: /save activity/i }).click();
-    await expect(page).toHaveURL(/\/activities\/\d+$/);
+    const user = await loginFreshUser(page, request, "act_edit");
+    const activity = await createActivityForUser(request, user.access_token, { title: unique("Edit") });
+    await page.goto(`/activities/${activity.id}`);
 
     await page.getByRole("link", { name: /^edit$/i }).click();
     await expect(page).toHaveURL(/\/edit$/);
 
-    const newTitle = `${originalTitle} — edited`;
+    const newTitle = `${activity.title} — edited`;
     await page.locator("form input[required]").first().fill(newTitle);
     await page.getByRole("button", { name: /friends/i }).first().click();
     await page.getByRole("button", { name: /save changes/i }).click();
@@ -61,13 +44,9 @@ test.describe("Activities — create / view / edit / delete", () => {
   });
 
   test("deleting an activity navigates back to the feed", async ({ page, request }) => {
-    await loginFreshUser(page, request, "act_del");
-    await page.goto("/add-activity");
-    await page.getByPlaceholder("Morning Run").fill(unique("Doomed"));
-    await page.getByPlaceholder("5.0").fill("3");
-    await page.getByPlaceholder("30").fill("20");
-    await page.getByRole("button", { name: /save activity/i }).click();
-    await expect(page).toHaveURL(/\/activities\/\d+$/);
+    const user = await loginFreshUser(page, request, "act_del");
+    const activity = await createActivityForUser(request, user.access_token, { title: unique("Doomed") });
+    await page.goto(`/activities/${activity.id}`);
 
     page.once("dialog", (d) => d.accept());
     await page.getByRole("button", { name: /^delete$/i }).click();

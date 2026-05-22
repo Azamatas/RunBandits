@@ -20,18 +20,7 @@ at `http://localhost:5173`.
    cd frontend && npm run dev
    ```
 
-3. **Database seeded** (only needed once, or to reset state):
-   ```bash
-   # from repo root
-   .venv/bin/python3 seed.py
-   .venv/bin/python3 /tmp/seed_extras.py   # extras script created during setup
-   ```
-   Seed creates: `test_user` (`test@test.com` / `Test1234`) plus 5 named
-   athletes (`marc_runner`, `lisa_pace`, `tom_trails`, `nina_fast`, `alex_grind`,
-   all with password `Password1`), ~48 activities, kudos, friendships, and 4
-   segments with leaderboards.
-
-4. **Chromium installed** (one-time):
+3. **Chromium installed** (one-time):
    ```bash
    cd frontend && npx playwright install chromium
    ```
@@ -59,8 +48,8 @@ traces/screenshots are under `frontend/test-results/`.
 tests/
 ├── README.md
 ├── helpers/
-│   ├── auth.js     # loginAs, registerFresh, loginFreshUser, clearAuth, SEEDED creds
-│   └── data.js     # unique(), activityPayload(), segmentPayload()
+│   ├── auth.ts     # loginFreshUser, registerFresh, createActivityForUser, getMe, establishFriendship, ...
+│   └── data.ts     # unique(), activityPayload(), commonActivityPayload()
 └── e2e/
     ├── auth.spec.js          # register, login, logout, redirects
     ├── feed.spec.js          # feed render, kudos, pagination, navigation
@@ -74,9 +63,8 @@ tests/
 - **Selectors**: prefer `getByRole` + accessible name; fall back to visible
   text. Avoid CSS selectors for things users see; use them only for
   structural assertions (`.activity-card`, `.error`).
-- **State-changing tests** create a fresh user via `loginFreshUser()` so the
-  seeded users stay clean.
-- **Read-only tests** reuse seeded users via `loginAs(page, request, SEEDED.x)`.
+- **All tests** create fresh users on the fly via `loginFreshUser()` or
+  `registerFresh()` — no seeded users needed.
 - **`workers: 1`** is set in `playwright.config.js` to avoid race conditions
   on the shared database. Bump this up if you want to parallelize specific
   spec files later — annotate them with
@@ -98,9 +86,4 @@ curl -fsS http://localhost:5173/ >/dev/null && echo "frontend ok"
    `.filter({ hasText: ... })`, or a parent locator.
 3. If a test needs a stable identifier, add a `data-testid="..."` to the
    component and select with `page.getByTestId(...)`.
-4. The DB accumulates test data over time. Re-seed when it gets noisy:
-   ```bash
-   .venv/bin/python3 seed.py && .venv/bin/python3 /tmp/seed_extras.py
-   ```
-bin/python3 /tmp/seed_extras.py
    ```

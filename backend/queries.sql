@@ -1,16 +1,4 @@
 SELECT
-    u.username,
-    MIN(se.elapsed_time)                                                AS best_time_sec,
-    TO_CHAR((MIN(se.elapsed_time) || ' seconds')::INTERVAL, 'MI:SS')  AS best_time,
-    RANK() OVER (ORDER BY MIN(se.elapsed_time))                        AS rank
-FROM segment_efforts se
-JOIN users u ON u.id = se.athlete_id
-WHERE se.segment_id = 3001
-GROUP BY u.id, u.username
-ORDER BY best_time_sec;
-
-
-SELECT
     a.id,
     a.title,
     a.sport_type,

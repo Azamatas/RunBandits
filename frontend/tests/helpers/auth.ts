@@ -1,8 +1,10 @@
 import { expect } from "@playwright/test";
 import { unique, activityPayload } from "./data";
 
+const API = "http://localhost:8000/api";
+
 export async function loginAs(page, request, { email, password }) {
-  const res = await request.post("http://localhost:8000/auth/login", {
+  const res = await request.post(`${API}/auth/login`, {
     data: { email, password },
   });
   expect(res.ok(), `login API failed for ${email}: ${res.status()}`).toBeTruthy();
@@ -24,7 +26,7 @@ export async function registerFresh(request, prefix = "pw") {
   const username = unique(prefix);
   const email = `${username}@test.com`;
   const creds = { username, email, password: "Playwright1" };
-  const res = await request.post("http://localhost:8000/auth/register", { data: creds });
+  const res = await request.post(`${API}/auth/register`, { data: creds });
   expect(res.ok(), `register API failed: ${res.status()}`).toBeTruthy();
   const body = await res.json();
   return { ...creds, ...body };
@@ -55,7 +57,7 @@ export async function createActivityForUser(request, accessToken, overrides = {}
     distance: 5000,
     duration: 1800,
   };
-  const res = await request.post("http://localhost:8000/activities", {
+  const res = await request.post(`${API}/activities`, {
     headers: { Authorization: `Bearer ${accessToken}` },
     data: payload,
   });
@@ -71,7 +73,7 @@ export async function registerFreshUserWithActivity(request, prefix = "pw", acti
 }
 
 export async function getMe(request, accessToken) {
-  const res = await request.get("http://localhost:8000/users/me", {
+  const res = await request.get(`${API}/users/me`, {
     headers: { Authorization: `Bearer ${accessToken}` },
   });
   expect(res.ok(), `getMe API failed: ${res.status()}`).toBeTruthy();
@@ -79,7 +81,7 @@ export async function getMe(request, accessToken) {
 }
 
 export async function sendFriendRequest(request, accessToken, targetUserId) {
-  const res = await request.post(`http://localhost:8000/users/${targetUserId}/friend-request`, {
+  const res = await request.post(`${API}/users/${targetUserId}/friend-request`, {
     headers: { Authorization: `Bearer ${accessToken}` },
   });
   expect(res.ok(), `sendFriendRequest API failed: ${res.status()}`).toBeTruthy();
@@ -87,7 +89,7 @@ export async function sendFriendRequest(request, accessToken, targetUserId) {
 }
 
 export async function acceptFriendRequest(request, accessToken, requesterUserId) {
-  const res = await request.post(`http://localhost:8000/users/${requesterUserId}/accept-friend`, {
+  const res = await request.post(`${API}/users/${requesterUserId}/accept-friend`, {
     headers: { Authorization: `Bearer ${accessToken}` },
   });
   expect(res.ok(), `acceptFriendRequest API failed: ${res.status()}`).toBeTruthy();

@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from backend.config import config
 from backend.logging_config import setup_logging
 from backend.middleware.logging_middleware import LoggingMiddleware
-from backend.routers import activities, auth, common_activities, feed, kudos, segments, stats, users
+from backend.routers import activities, auth, common_activities, feed, kudos, stats, users
 
 load_dotenv()
 
@@ -44,7 +44,6 @@ app.include_router(kudos.router, prefix="/api")
 app.include_router(feed.router, prefix="/api")
 app.include_router(stats.router, prefix="/api")
 app.include_router(common_activities.router, prefix="/api")
-app.include_router(segments.router, prefix="/api")
 
 from backend.static_files import mount_static_files  # noqa: E402
 
