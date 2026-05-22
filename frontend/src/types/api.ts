@@ -48,6 +48,7 @@ export interface CommonActivity {
   polyline: string | null;
   distance: number | null;
   sport_type: SportType;
+  run_count: number;
 }
 
 export interface CommonActivityCreatePayload {

@@ -109,6 +109,8 @@ export default function CreateCommonActivity() {
             <label>Route</label>
             <RouteBuilder
               onChange={(encoded) => setPolyline(encoded)}
+              hideTimes
+              draftKey="heist_route_draft"
             />
           </div>
 

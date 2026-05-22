@@ -22,6 +22,7 @@ class CommonActivityOut(BaseModel):
     polyline: str | None
     distance: float | None
     sport_type: SportType | None
+    run_count: int = 0
 
     model_config = {"from_attributes": True}
 

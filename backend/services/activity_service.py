@@ -140,10 +140,16 @@ def update_activity(db: Session, activity_id: int, owner_id: int, updates: Activ
     if not activity:
         logger.warning(f"Activity {activity_id} not found for owner {owner_id}")
         raise NotFoundError("Activity not found")
+    polyline_changed = updates.polyline is not None and updates.polyline != activity.polyline
     for field in fields(updates):
         value = getattr(updates, field.name)
         if value is not None:
             setattr(activity, field.name, value)
+    if polyline_changed:
+        activity.common_activity_id = None
+        db.flush()
+        db.refresh(activity)
+        common_activity_service.link_activity_to_closest_common(db, activity)
     db.commit()
     db.refresh(activity)
     logger.info(f"Updated activity {activity_id}")

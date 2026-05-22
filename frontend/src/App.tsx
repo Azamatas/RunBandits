@@ -13,8 +13,6 @@ import Social from "./pages/Social";
 import CommonActivities from "./pages/CommonActivities";
 import CommonActivityDetail from "./pages/CommonActivityDetail";
 import CreateCommonActivity from "./pages/CreateCommonActivity";
-import Segments from "./pages/Segments";
-import SegmentDetail from "./pages/SegmentDetail";
 
 export default function App() {
   return (
@@ -33,8 +31,6 @@ export default function App() {
         <Route path="/social" element={<ProtectedRoute><Social /></ProtectedRoute>} />
         <Route path="/common-activities" element={<ProtectedRoute><CommonActivities /></ProtectedRoute>} />
         <Route path="/common-activities/:id" element={<ProtectedRoute><CommonActivityDetail /></ProtectedRoute>} />
-        <Route path="/segments" element={<ProtectedRoute><Segments /></ProtectedRoute>} />
-        <Route path="/segments/:id" element={<ProtectedRoute><SegmentDetail /></ProtectedRoute>} />
         <Route path="*" element={<Navigate to="/feed" replace />} />
       </Routes>
     </>

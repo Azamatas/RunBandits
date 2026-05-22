@@ -16,6 +16,8 @@ interface RouteBuilderProps {
   onDuration?: (totalMinutes: number) => void;
   paceMinPerKm?: number | null;
   initialPolyline?: string;
+  hideTimes?: boolean;
+  draftKey?: string;
 }
 
 const DEFAULT_PACE_MIN_PER_KM = 5;
@@ -168,7 +170,7 @@ function LineDragger({
   );
 }
 
-export default function RouteBuilder({ onChange, onDistance, onDuration, paceMinPerKm, initialPolyline }: RouteBuilderProps) {
+export default function RouteBuilder({ onChange, onDistance, onDuration, paceMinPerKm, initialPolyline, hideTimes, draftKey = ROUTE_DRAFT_KEY }: RouteBuilderProps) {
   const [points, setPoints] = useState<LatLng[]>([]);
   const [legTimes, setLegTimes] = useState<string[]>([]);
   const [closed, setClosed] = useState(false);
@@ -177,7 +179,7 @@ export default function RouteBuilder({ onChange, onDistance, onDuration, paceMin
   const stateRef = useRef({ points: [] as LatLng[], legTimes: [] as string[], closed: false });
 
   useEffect(() => {
-    if (initialPolyline || localStorage.getItem(ROUTE_DRAFT_KEY)) return;
+    if (initialPolyline || localStorage.getItem(draftKey)) return;
     navigator.geolocation?.getCurrentPosition(
       (pos) => {
         if (stateRef.current.points.length === 0) {
@@ -196,14 +198,18 @@ export default function RouteBuilder({ onChange, onDistance, onDuration, paceMin
       try {
         const decoded = polylineCodec.decode(initialPolyline) as LatLng[];
         if (decoded.length >= 2) {
-          emit(decoded, Array(decoded.length - 1).fill(""), false);
-          setCenter(decoded[Math.floor(decoded.length / 2)]);
+          const first = decoded[0];
+          const last = decoded[decoded.length - 1];
+          const isClosed = first[0] === last[0] && first[1] === last[1];
+          const pts = isClosed ? decoded.slice(0, -1) : decoded;
+          emit(pts, Array(isClosed ? pts.length : pts.length - 1).fill(""), isClosed);
+          setCenter(pts[Math.floor(pts.length / 2)]);
           setRecenterTrigger((t) => t + 1);
         }
       } catch {}
     } else {
       try {
-        const raw = localStorage.getItem(ROUTE_DRAFT_KEY);
+        const raw = localStorage.getItem(draftKey);
         if (!raw) return;
         const { points: pts, legTimes: times, closed: cl } = JSON.parse(raw) as {
           points: LatLng[];
@@ -237,9 +243,9 @@ export default function RouteBuilder({ onChange, onDistance, onDuration, paceMin
       // Stored as JSON (not a polyline) so a single point is preserved too.
       // Not used in edit mode — the activity's own polyline is the source of truth.
       if (nextPoints.length > 0)
-        localStorage.setItem(ROUTE_DRAFT_KEY, JSON.stringify({ points: nextPoints, legTimes: nextTimes, closed: nextClosed }));
+        localStorage.setItem(draftKey, JSON.stringify({ points: nextPoints, legTimes: nextTimes, closed: nextClosed }));
       else
-        localStorage.removeItem(ROUTE_DRAFT_KEY);
+        localStorage.removeItem(draftKey);
     }
     onChange(encoded);
     onDistance?.(nextPoints.length >= 2 ? pathKm(nextPoints, nextClosed) : 0);
@@ -502,7 +508,7 @@ export default function RouteBuilder({ onChange, onDistance, onDuration, paceMin
         </span>
       </div>
 
-      {edgeCount > 0 && (
+      {edgeCount > 0 && !hideTimes && (
         <div style={{ marginTop: 12, border: "1px solid var(--border)", borderRadius: "var(--radius-md)", overflow: "hidden" }}>
           <div style={{
             display: "grid", gridTemplateColumns: "3.5rem 1fr 1fr 1fr",

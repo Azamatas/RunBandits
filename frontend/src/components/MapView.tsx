@@ -13,7 +13,7 @@ function FitBounds({ positions }) {
   return null;
 }
 
-export default function MapView({ polyline, height = 240, sportColor = "var(--accent)" }) {
+export default function MapView({ polyline, height = 240, sportColor = "var(--accent)", draggable = false }) {
   const positions = useMemo(() => {
     if (!polyline) return [];
     try {
@@ -29,7 +29,7 @@ export default function MapView({ polyline, height = 240, sportColor = "var(--ac
 
   return (
     <div className="map-container" style={{ height }}>
-      <MapContainer center={center} zoom={14} scrollWheelZoom={false} dragging={false} style={{ height: "100%", width: "100%" }}>
+      <MapContainer center={center} zoom={14} scrollWheelZoom={draggable} dragging={draggable} style={{ height: "100%", width: "100%" }}>
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

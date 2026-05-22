@@ -110,13 +110,26 @@ def list_common_activities(
     sport_type: str | None = None,
     limit: int = 20,
     offset: int = 0,
-) -> list[CommonActivity]:
+) -> list[dict]:
     logger.debug("Listing common activities with offset=%d, limit=%d", offset, limit)
-    query = db.query(CommonActivity)
+    run_count_subq = (
+        db.query(func.count(Activity.id))
+        .filter(Activity.common_activity_id == CommonActivity.id)
+        .correlate(CommonActivity)
+        .scalar_subquery()
+    )
+    query = db.query(CommonActivity, run_count_subq.label("run_count"))
     if sport_type:
         query = query.filter(CommonActivity.sport_type == sport_type)
-    query = query.offset(offset).limit(limit)
-    return query.all()
+    query = query.order_by(run_count_subq.desc()).offset(offset).limit(limit)
+    return [
+        {
+            "id": ca.id, "name": ca.name, "polyline": ca.polyline,
+            "distance": ca.distance, "sport_type": ca.sport_type,
+            "run_count": count,
+        }
+        for ca, count in query.all()
+    ]
 
 
 def list_linked_activities(

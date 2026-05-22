@@ -9,6 +9,7 @@ import MapView from "../components/MapView";
 import LeaderboardTable from "../components/LeaderboardTable";
 import ActivityCard from "../components/ActivityCard";
 import SportIcon from "../components/SportIcon";
+import { heistColor } from "../utils/heistColor";
 
 export default function CommonActivityDetail() {
   const { id } = useParams<{ id: string }>();
@@ -52,7 +53,7 @@ export default function CommonActivityDetail() {
 
       {ca.polyline && (
         <div className="card" style={{ padding: 0, overflow: "hidden", marginBottom: 24 }}>
-          <MapView polyline={ca.polyline} height={320} />
+          <MapView polyline={ca.polyline} height={320} sportColor={heistColor(ca.id)} draggable />
         </div>
       )}
 
