@@ -83,6 +83,7 @@ function Recenter({ center, trigger }: { center: LatLng; trigger: number }) {
   return null;
 }
 
+
 function fmtTime(totalMinutes: number): string {
   const m = Math.floor(totalMinutes);
   const s = Math.round((totalMinutes - m) * 60);
@@ -177,6 +178,7 @@ export default function RouteBuilder({ onChange, onDistance, onDuration, paceMin
   const [center, setCenter] = useState<LatLng>(DEFAULT_CENTER);
   const [recenterTrigger, setRecenterTrigger] = useState(0);
   const stateRef = useRef({ points: [] as LatLng[], legTimes: [] as string[], closed: false });
+  const mapRef = useRef<L.Map | null>(null);
 
   useEffect(() => {
     if (initialPolyline || localStorage.getItem(draftKey)) return;
@@ -203,8 +205,13 @@ export default function RouteBuilder({ onChange, onDistance, onDuration, paceMin
           const isClosed = first[0] === last[0] && first[1] === last[1];
           const pts = isClosed ? decoded.slice(0, -1) : decoded;
           emit(pts, Array(isClosed ? pts.length : pts.length - 1).fill(""), isClosed);
-          setCenter(pts[Math.floor(pts.length / 2)]);
-          setRecenterTrigger((t) => t + 1);
+          const map = mapRef.current;
+          if (map) {
+            setTimeout(() => {
+              map.invalidateSize();
+              map.fitBounds(pts as any, { padding: [40, 40], animate: false });
+            }, 0);
+          }
         }
       } catch {}
     } else {
@@ -372,6 +379,7 @@ export default function RouteBuilder({ onChange, onDistance, onDuration, paceMin
     <div>
       <div className="map-container" style={{ height: 480, position: "relative" }}>
         <MapContainer
+          ref={mapRef}
           center={center}
           zoom={13}
           scrollWheelZoom
