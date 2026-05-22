@@ -8,7 +8,7 @@ export const ROUTE_DRAFT_KEY = "route_builder_draft";
 
 type LatLng = [number, number];
 
-const DEFAULT_CENTER: LatLng = [51.505, -0.09];
+const DEFAULT_CENTER: LatLng = [53.1671, 8.6493];
 
 interface RouteBuilderProps {
   onChange: (encodedPolyline: string) => void;
@@ -174,13 +174,25 @@ export default function RouteBuilder({ onChange, onDistance, onDuration, paceMin
   const [closed, setClosed] = useState(false);
   const [center, setCenter] = useState<LatLng>(DEFAULT_CENTER);
   const [recenterTrigger, setRecenterTrigger] = useState(0);
-  const [locating, setLocating] = useState(!initialPolyline && !localStorage.getItem(ROUTE_DRAFT_KEY));
-
   const stateRef = useRef({ points: [] as LatLng[], legTimes: [] as string[], closed: false });
 
   useEffect(() => {
+    if (initialPolyline || localStorage.getItem(ROUTE_DRAFT_KEY)) return;
+    navigator.geolocation?.getCurrentPosition(
+      (pos) => {
+        if (stateRef.current.points.length === 0) {
+          setCenter([pos.coords.latitude, pos.coords.longitude]);
+          setRecenterTrigger((t) => t + 1);
+        }
+      },
+      () => {},
+      { enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 },
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
     if (initialPolyline) {
-      // Edit mode: restore from the activity's own polyline.
       try {
         const decoded = polylineCodec.decode(initialPolyline) as LatLng[];
         if (decoded.length >= 2) {
@@ -190,8 +202,6 @@ export default function RouteBuilder({ onChange, onDistance, onDuration, paceMin
         }
       } catch {}
     } else {
-      // New-route mode: restore the full draft from localStorage so even a
-      // single point (which can't be encoded as a polyline) survives a refresh.
       try {
         const raw = localStorage.getItem(ROUTE_DRAFT_KEY);
         if (!raw) return;
@@ -210,20 +220,7 @@ export default function RouteBuilder({ onChange, onDistance, onDuration, paceMin
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => {
-    if (!locating) return;
-    navigator.geolocation?.getCurrentPosition(
-      (pos) => {
-        if (stateRef.current.points.length === 0) {
-          setCenter([pos.coords.latitude, pos.coords.longitude]);
-        }
-        setLocating(false);
-      },
-      () => setLocating(false),
-      { enableHighAccuracy: false, timeout: 5000, maximumAge: Infinity },
-    );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+
 
   function emit(nextPoints: LatLng[], nextTimes: string[], nextClosed: boolean) {
     stateRef.current = { points: nextPoints, legTimes: nextTimes, closed: nextClosed };
@@ -363,13 +360,7 @@ export default function RouteBuilder({ onChange, onDistance, onDuration, paceMin
     onMouseUp: (e) => e.stopPropagation(),
   };
 
-  if (locating) {
-    return (
-      <div className="map-container" style={{ height: 480, display: "flex", alignItems: "center", justifyContent: "center", background: "var(--gray-100)", borderRadius: "var(--radius-lg)", color: "var(--text-muted)", fontSize: "var(--text-sm)" }}>
-        Detecting your location…
-      </div>
-    );
-  }
+
 
   return (
     <div>

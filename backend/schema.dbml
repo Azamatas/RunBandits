@@ -5,20 +5,7 @@ Table users {
   password_hash VARCHAR(255) [not null]
   bio TEXT
   location VARCHAR(100)
-  created_at DATETIME [default: `datetime.utcnow`]
-}
-
-Table common_activities {
-  id INTEGER [pk, increment]
-  name VARCHAR(200) [not null]
-  polyline TEXT
-  path GEOMETRY(LINESTRING, 4326)
-  distance FLOAT
-  sport_type VARCHAR(20)
-
-  indexes {
-    (path) [type: GIST]
-  }
+  created_at DATETIME [default: `now()`]
 }
 
 Table activities {
@@ -28,12 +15,11 @@ Table activities {
   sport_type ESPORT_TYPE [not null]
   distance FLOAT
   duration INTEGER
-  elevation FLOAT
   polyline TEXT
-  path GEOMETRY(LINESTRING, 4326)
+  path GEOMETRY(LINESTRING, 3857)
   visibility EVISIBILITY [default: 'public']
   started_at DATETIME
-  created_at DATETIME [default: `datetime.utcnow`]
+  created_at DATETIME [default: `now()`]
   common_activity_id INTEGER
 
   indexes {
@@ -43,36 +29,30 @@ Table activities {
   }
 }
 
-Table friendships {
+Table common_activities {
   id INTEGER [pk, increment]
-  requester_id INTEGER [not null]
-  addressee_id INTEGER [not null]
-  status EFRIENDSHIP_STATUS [default: 'pending']
-  created_at DATETIME [default: `datetime.utcnow`]
+  name VARCHAR(200) [not null]
+  sport_type ESPORT_TYPE [not null]
+  polyline TEXT
+  path GEOMETRY(LINESTRING, 3857)
+  distance FLOAT
 
   indexes {
-    (requester_id)
-    (addressee_id)
-  }
-}
-
-Table kudos {
-  id INTEGER [pk, increment]
-  activity_id INTEGER [not null]
-  user_id INTEGER [not null]
-  created_at DATETIME [default: `datetime.utcnow`]
-
-  indexes {
-    (activity_id)
-    (user_id)
+    (path) [type: GIST]
   }
 }
 
 Table segments {
   id INTEGER [pk, increment]
   name VARCHAR(200) [not null]
+  sport_type ESPORT_TYPE [not null]
   polyline TEXT
+  path GEOMETRY(LINESTRING, 3857)
   distance FLOAT
+
+  indexes {
+    (path) [type: GIST]
+  }
 }
 
 Table segment_efforts {
@@ -90,9 +70,38 @@ Table segment_efforts {
   }
 }
 
+Table friendships {
+  id INTEGER [pk, increment]
+  requester_id INTEGER [not null]
+  addressee_id INTEGER [not null]
+  status EFRIENDSHIP_STATUS [default: 'pending']
+  created_at DATETIME [default: `now()`]
+
+  indexes {
+    (requester_id)
+    (addressee_id)
+  }
+}
+
+Table kudos {
+  id INTEGER [pk, increment]
+  activity_id INTEGER [not null]
+  user_id INTEGER [not null]
+  created_at DATETIME [default: `now()`]
+
+  indexes {
+    (activity_id)
+    (user_id)
+  }
+}
+
 Table activity_athletes {
-  activity_id INTEGER [pk]
-  user_id INTEGER [pk]
+  activity_id INTEGER [not null]
+  user_id INTEGER [not null]
+
+  indexes {
+    (activity_id, user_id) [pk]
+  }
 }
 
 Enum ESPORT_TYPE {
@@ -114,6 +123,7 @@ Enum EFRIENDSHIP_STATUS {
 }
 
 Ref: activities.owner_id > users.id
+Ref: activities.common_activity_id > common_activities.id
 
 Ref: friendships.requester_id > users.id
 Ref: friendships.addressee_id > users.id
@@ -124,4 +134,6 @@ Ref: kudos.user_id > users.id
 Ref: activity_athletes.activity_id > activities.id
 Ref: activity_athletes.user_id > users.id
 
-Ref: activities.common_activity_id > common_activities.id
+Ref: segment_efforts.segment_id > segments.id
+Ref: segment_efforts.activity_id > activities.id
+Ref: segment_efforts.athlete_id > users.id
