@@ -37,20 +37,17 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(auth.router)
-app.include_router(users.router)
-app.include_router(activities.router)
-app.include_router(kudos.router)
-app.include_router(feed.router)
-app.include_router(stats.router)
-app.include_router(common_activities.router)
-app.include_router(segments.router)
+app.include_router(auth.router, prefix="/api")
+app.include_router(users.router, prefix="/api")
+app.include_router(activities.router, prefix="/api")
+app.include_router(kudos.router, prefix="/api")
+app.include_router(feed.router, prefix="/api")
+app.include_router(stats.router, prefix="/api")
+app.include_router(common_activities.router, prefix="/api")
+app.include_router(segments.router, prefix="/api")
 
+from backend.static_files import mount_static_files  # noqa: E402
 
-@app.get("/")
-def health() -> dict[str, str]:
-    logger.debug("Health check requested")
-    return {"status": "ok"}
-
+mount_static_files(app)
 
 logger.info("RunBanditsRun backend started")

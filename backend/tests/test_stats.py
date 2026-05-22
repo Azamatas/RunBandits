@@ -14,7 +14,7 @@ class TestStats:
             )
         )
         db.commit()
-        resp = client.get("/stats/me", headers=headers)
+        resp = client.get("/api/stats/me", headers=headers)
         assert resp.status_code == 200
         data = resp.json()
         assert "totals" in data
@@ -27,7 +27,7 @@ class TestStats:
             Activity(owner_id=user.id, title="Ride 1", sport_type=SportType.RIDE, distance=20000)
         )
         db.commit()
-        resp = client.get("/stats/me?sport_type=run", headers=headers)
+        resp = client.get("/api/stats/me?sport_type=run", headers=headers)
         assert resp.status_code == 200
         data = resp.json()
         assert "run" in data["totals"]
@@ -35,7 +35,7 @@ class TestStats:
 
     def test_stats_empty(self, client, auth_user):
         _, headers = auth_user
-        resp = client.get("/stats/me", headers=headers)
+        resp = client.get("/api/stats/me", headers=headers)
         assert resp.status_code == 200
         data = resp.json()
         assert data["totals"] == {}

@@ -46,7 +46,7 @@ class TestSegmentEndpoints:
     def test_create_segment(self, client, auth_user):
         _, headers = auth_user
         resp = client.post(
-            "/segments/",
+            "/api/segments/",
             json={"name": "Sprint", "polyline": VONDELPARK_POLYLINE},
             headers=headers,
         )
@@ -57,7 +57,7 @@ class TestSegmentEndpoints:
         assert data["distance"] > 0
 
     def test_create_segment_requires_auth(self, client):
-        resp = client.post("/segments/", json={"name": "Sprint", "polyline": VONDELPARK_POLYLINE})
+        resp = client.post("/api/segments/", json={"name": "Sprint", "polyline": VONDELPARK_POLYLINE})
         assert resp.status_code == 401
 
     def test_list_segments(self, client, db, auth_user):
@@ -65,7 +65,7 @@ class TestSegmentEndpoints:
         make_segment(db, name="A")
         make_segment(db, polyline=AMSTEL_POLYLINE, name="B")
         db.commit()
-        resp = client.get("/segments/", headers=headers)
+        resp = client.get("/api/segments/", headers=headers)
         assert resp.status_code == 200
         assert len(resp.json()) >= 2
 
@@ -73,20 +73,20 @@ class TestSegmentEndpoints:
         _, headers = auth_user
         seg = make_segment(db)
         db.commit()
-        resp = client.get(f"/segments/{seg.id}", headers=headers)
+        resp = client.get(f"/api/segments/{seg.id}", headers=headers)
         assert resp.status_code == 200
         assert resp.json()["id"] == seg.id
 
     def test_get_segment_not_found(self, client, auth_user):
         _, headers = auth_user
-        resp = client.get("/segments/999999", headers=headers)
+        resp = client.get("/api/segments/999999", headers=headers)
         assert resp.status_code == 404
 
     def test_leaderboard_empty(self, client, db, auth_user):
         _, headers = auth_user
         seg = make_segment(db)
         db.commit()
-        resp = client.get(f"/segments/{seg.id}/leaderboard", headers=headers)
+        resp = client.get(f"/api/segments/{seg.id}/leaderboard", headers=headers)
         assert resp.status_code == 200
         assert resp.json() == []
 
@@ -94,7 +94,7 @@ class TestSegmentEndpoints:
         _, headers = auth_user
         seg = make_segment(db)
         db.commit()
-        resp = client.get(f"/segments/{seg.id}/efforts", headers=headers)
+        resp = client.get(f"/api/segments/{seg.id}/efforts", headers=headers)
         assert resp.status_code == 200
         assert resp.json() == []
 

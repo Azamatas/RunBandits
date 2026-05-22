@@ -25,7 +25,7 @@ class TestListCommonActivities:
         ca = CommonActivity(name="Main Loop", distance=1000, sport_type=SportType.RUN)
         db.add(ca)
         db.commit()
-        resp = client.get("/common-activities/", headers=headers)
+        resp = client.get("/api/common-activities/", headers=headers)
         assert resp.status_code == 200
         data = resp.json()
         assert len(data) == 1
@@ -33,7 +33,7 @@ class TestListCommonActivities:
 
     def test_list_common_activities_empty(self, client, auth_user):
         _, headers = auth_user
-        resp = client.get("/common-activities/", headers=headers)
+        resp = client.get("/api/common-activities/", headers=headers)
         assert resp.status_code == 200
         assert resp.json() == []
 
@@ -43,7 +43,7 @@ class TestListCommonActivities:
         ca_ride = CommonActivity(name="Ride Path", distance=2000, sport_type=SportType.RIDE)
         db.add_all([ca_run, ca_ride])
         db.commit()
-        resp = client.get("/common-activities/?sport_type=run", headers=headers)
+        resp = client.get("/api/common-activities/?sport_type=run", headers=headers)
         assert resp.status_code == 200
         data = resp.json()
         assert len(data) == 1
@@ -55,11 +55,11 @@ class TestListCommonActivities:
             ca = CommonActivity(name=f"Path {i}", distance=float(i * 100), sport_type=SportType.RUN)
             db.add(ca)
         db.commit()
-        resp = client.get("/common-activities/?limit=10&offset=0", headers=headers)
+        resp = client.get("/api/common-activities/?limit=10&offset=0", headers=headers)
         assert resp.status_code == 200
         assert len(resp.json()) == 10
 
-        resp = client.get("/common-activities/?limit=10&offset=10", headers=headers)
+        resp = client.get("/api/common-activities/?limit=10&offset=10", headers=headers)
         assert resp.status_code == 200
         assert len(resp.json()) == 10
 
@@ -70,13 +70,13 @@ class TestGetCommonActivity:
         ca = CommonActivity(name="Main Loop", distance=1000, sport_type="run")
         db.add(ca)
         db.commit()
-        resp = client.get(f"/common-activities/{ca.id}", headers=headers)
+        resp = client.get(f"/api/common-activities/{ca.id}", headers=headers)
         assert resp.status_code == 200
         assert resp.json()["name"] == "Main Loop"
 
     def test_get_common_activity_not_found(self, client, auth_user):
         _, headers = auth_user
-        resp = client.get("/common-activities/9999", headers=headers)
+        resp = client.get("/api/common-activities/9999", headers=headers)
         assert resp.status_code == 404
 
 
@@ -86,7 +86,7 @@ class TestLeaderboard:
         ca = CommonActivity(name="Empty Path", distance=500, sport_type="run")
         db.add(ca)
         db.commit()
-        resp = client.get(f"/common-activities/{ca.id}/leaderboard", headers=headers)
+        resp = client.get(f"/api/common-activities/{ca.id}/leaderboard", headers=headers)
         assert resp.status_code == 200
         assert resp.json() == []
 
@@ -117,7 +117,7 @@ class TestLeaderboard:
         db.add_all([activity1, activity2])
         db.commit()
 
-        resp = client.get(f"/common-activities/{ca.id}/leaderboard", headers=headers)
+        resp = client.get(f"/api/common-activities/{ca.id}/leaderboard", headers=headers)
         assert resp.status_code == 200
         data = resp.json()
         assert len(data) == 1
@@ -151,7 +151,7 @@ class TestLeaderboard:
         db.add_all([activity1, activity2])
         db.commit()
 
-        resp = client.get(f"/common-activities/{ca.id}/leaderboard", headers=headers)
+        resp = client.get(f"/api/common-activities/{ca.id}/leaderboard", headers=headers)
         assert resp.status_code == 200
         data = resp.json()
         assert len(data) == 2
@@ -162,7 +162,7 @@ class TestLeaderboard:
 
     def test_leaderboard_not_found_common_activity(self, client, auth_user):
         _, headers = auth_user
-        resp = client.get("/common-activities/9999/leaderboard", headers=headers)
+        resp = client.get("/api/common-activities/9999/leaderboard", headers=headers)
         assert resp.status_code == 404
 
     def test_leaderboard_limit(self, client, db, auth_user, second_user):
@@ -185,7 +185,7 @@ class TestLeaderboard:
             db.add(activity)
         db.commit()
 
-        resp = client.get(f"/common-activities/{ca.id}/leaderboard?limit=5", headers=headers)
+        resp = client.get(f"/api/common-activities/{ca.id}/leaderboard?limit=5", headers=headers)
         assert resp.status_code == 200
         data = resp.json()
         assert len(data) <= 5
@@ -227,7 +227,7 @@ class TestCreateCommonActivity:
         _, headers = auth_user
         poly = _encode_polyline(db, _CLUSTER_WKT)
         body = {"name": "Morning Loop", "sport_type": "run", "polyline": poly}
-        resp = client.post("/common-activities/", json=body, headers=headers)
+        resp = client.post("/api/common-activities/", json=body, headers=headers)
         assert resp.status_code == 201, resp.text
         data = resp.json()
         assert data["name"] == "Morning Loop"
@@ -236,7 +236,7 @@ class TestCreateCommonActivity:
 
     def test_create_unauthorized(self, client):
         body = {"name": "Loop", "sport_type": "run", "polyline": "abc"}
-        resp = client.post("/common-activities/", json=body)
+        resp = client.post("/api/common-activities/", json=body)
         assert resp.status_code == 401
 
     def test_create_rejects_too_close(self, client, db, auth_user):
@@ -251,7 +251,7 @@ class TestCreateCommonActivity:
         db.commit()
 
         body = {"name": "Duplicate Loop", "sport_type": "run", "polyline": poly}
-        resp = client.post("/common-activities/", json=body, headers=headers)
+        resp = client.post("/api/common-activities/", json=body, headers=headers)
         assert resp.status_code == 409
         assert "similar route" in resp.json()["detail"].lower()
 
@@ -267,7 +267,7 @@ class TestCreateCommonActivity:
         db.commit()
 
         body = {"name": "Ride Loop", "sport_type": "ride", "polyline": poly_run}
-        resp = client.post("/common-activities/", json=body, headers=headers)
+        resp = client.post("/api/common-activities/", json=body, headers=headers)
         assert resp.status_code == 201, resp.text
 
     def test_create_links_existing_activities(self, client, db, auth_user, second_user):
@@ -287,7 +287,7 @@ class TestCreateCommonActivity:
         db.commit()
 
         body = {"name": "New Loop", "sport_type": "run", "polyline": poly}
-        resp = client.post("/common-activities/", json=body, headers=headers)
+        resp = client.post("/api/common-activities/", json=body, headers=headers)
         assert resp.status_code == 201, resp.text
         ca_id = resp.json()["id"]
 
@@ -311,7 +311,7 @@ class TestCreateCommonActivity:
         db.commit()
 
         body = {"name": "New Loop", "sport_type": "run", "polyline": poly}
-        resp = client.post("/common-activities/", json=body, headers=headers)
+        resp = client.post("/api/common-activities/", json=body, headers=headers)
         assert resp.status_code == 201, resp.text
 
         db.refresh(activity)
@@ -320,7 +320,7 @@ class TestCreateCommonActivity:
     def test_create_empty_polyline_rejected(self, client, auth_user):
         _, headers = auth_user
         body = {"name": "Bad", "sport_type": "run", "polyline": ""}
-        resp = client.post("/common-activities/", json=body, headers=headers)
+        resp = client.post("/api/common-activities/", json=body, headers=headers)
         assert resp.status_code == 422
 
 
@@ -344,7 +344,7 @@ class TestActivityAutoLink:
             "visibility": "public",
             "polyline": poly,
         }
-        resp = client.post("/activities/", json=activity_body, headers=headers)
+        resp = client.post("/api/activities/", json=activity_body, headers=headers)
         assert resp.status_code == 200, resp.text
         activity_id = resp.json()["id"]
 
@@ -371,7 +371,7 @@ class TestActivityAutoLink:
             "visibility": "public",
             "polyline": poly,
         }
-        resp = client.post("/activities/", json=activity_body, headers=headers)
+        resp = client.post("/api/activities/", json=activity_body, headers=headers)
         assert resp.status_code == 200, resp.text
         activity_id = resp.json()["id"]
 

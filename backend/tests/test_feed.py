@@ -14,7 +14,7 @@ class TestFeed:
             )
         )
         db.commit()
-        resp = client.get("/feed/", headers=headers)
+        resp = client.get("/api/feed/", headers=headers)
         assert resp.status_code == 200
         assert len(resp.json()) >= 1
 
@@ -35,7 +35,7 @@ class TestFeed:
             )
         )
         db.commit()
-        resp = client.get("/feed/", headers=headers)
+        resp = client.get("/api/feed/", headers=headers)
         assert resp.status_code == 200
 
     def test_feed_excludes_private(self, client, db, auth_user, second_user_auth):
@@ -50,6 +50,6 @@ class TestFeed:
             )
         )
         db.commit()
-        resp = client.get("/feed/", headers=headers)
+        resp = client.get("/api/feed/", headers=headers)
         assert resp.status_code == 200
         assert all(a["title"] != "Private Run" for a in resp.json())

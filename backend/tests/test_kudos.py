@@ -13,7 +13,7 @@ class TestGiveKudos:
         )
         db.add(activity)
         db.commit()
-        resp = client.post(f"/activities/{activity.id}/kudos", headers=headers)
+        resp = client.post(f"/api/activities/{activity.id}/kudos", headers=headers)
         assert resp.status_code == 201
 
     def test_give_kudos_count_correct(self, client, db, auth_user, second_user):
@@ -26,7 +26,7 @@ class TestGiveKudos:
         )
         db.add(activity)
         db.commit()
-        resp = client.post(f"/activities/{activity.id}/kudos", headers=headers)
+        resp = client.post(f"/api/activities/{activity.id}/kudos", headers=headers)
         assert resp.json()["kudos_count"] == 1
 
     def test_give_kudos_duplicate(self, client, db, auth_user, second_user):
@@ -39,8 +39,8 @@ class TestGiveKudos:
         )
         db.add(activity)
         db.commit()
-        client.post(f"/activities/{activity.id}/kudos", headers=headers)
-        resp = client.post(f"/activities/{activity.id}/kudos", headers=headers)
+        client.post(f"/api/activities/{activity.id}/kudos", headers=headers)
+        resp = client.post(f"/api/activities/{activity.id}/kudos", headers=headers)
         assert resp.status_code == 400
 
 
@@ -57,7 +57,7 @@ class TestRemoveKudos:
         db.commit()
         db.add(Kudos(activity_id=activity.id, user_id=user.id))
         db.commit()
-        resp = client.delete(f"/activities/{activity.id}/kudos", headers=headers)
+        resp = client.delete(f"/api/activities/{activity.id}/kudos", headers=headers)
         assert resp.status_code == 204
 
     def test_remove_kudos_not_found(self, client, db, auth_user, second_user):
@@ -70,5 +70,5 @@ class TestRemoveKudos:
         )
         db.add(activity)
         db.commit()
-        resp = client.delete(f"/activities/{activity.id}/kudos", headers=headers)
+        resp = client.delete(f"/api/activities/{activity.id}/kudos", headers=headers)
         assert resp.status_code == 404

@@ -1,0 +1,15 @@
+.git
+__pycache__
+.venv
+node_modules
+frontend/dist
+frontend/playwright-report
+frontend/test-results
+.env
+.mypy_cache
+.ruff_cache
+.pytest_cache
+logs
+*.db
+.DS_Store
+.claude

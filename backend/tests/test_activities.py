@@ -6,7 +6,7 @@ class TestCreateActivity:
     def test_create_activity(self, client, auth_user):
         _, headers = auth_user
         resp = client.post(
-            "/activities/",
+            "/api/activities/",
             json={
                 "title": "Morning Run",
                 "sport_type": "run",
@@ -24,7 +24,7 @@ class TestCreateActivity:
     def test_create_activity_with_tagged(self, client, auth_user, second_user):
         user, headers = auth_user
         resp = client.post(
-            "/activities/",
+            "/api/activities/",
             json={
                 "title": "Group Ride",
                 "sport_type": "ride",
@@ -43,7 +43,7 @@ class TestGetActivity:
         )
         db.add(activity)
         db.commit()
-        resp = client.get(f"/activities/{activity.id}", headers=second_user_auth[1])
+        resp = client.get(f"/api/activities/{activity.id}", headers=second_user_auth[1])
         assert resp.status_code == 200
 
     def test_get_activity_friends_only(self, client, db, auth_user, second_user_auth):
@@ -53,7 +53,7 @@ class TestGetActivity:
         )
         db.add(activity)
         db.commit()
-        resp = client.get(f"/activities/{activity.id}", headers=second_user_auth[1])
+        resp = client.get(f"/api/activities/{activity.id}", headers=second_user_auth[1])
         assert resp.status_code == 404
 
     def test_get_activity_friends_visible_to_friend(self, client, db, auth_user, second_user_auth):
@@ -70,7 +70,7 @@ class TestGetActivity:
             )
         )
         db.commit()
-        resp = client.get(f"/activities/{activity.id}", headers=second_user_auth[1])
+        resp = client.get(f"/api/activities/{activity.id}", headers=second_user_auth[1])
         assert resp.status_code == 200
 
     def test_get_activity_private(self, client, db, auth_user, second_user_auth):
@@ -80,7 +80,7 @@ class TestGetActivity:
         )
         db.add(activity)
         db.commit()
-        resp = client.get(f"/activities/{activity.id}", headers=second_user_auth[1])
+        resp = client.get(f"/api/activities/{activity.id}", headers=second_user_auth[1])
         assert resp.status_code == 404
 
     def test_get_own_private_activity(self, client, db, auth_user):
@@ -90,7 +90,7 @@ class TestGetActivity:
         )
         db.add(activity)
         db.commit()
-        resp = client.get(f"/activities/{activity.id}", headers=headers)
+        resp = client.get(f"/api/activities/{activity.id}", headers=headers)
         assert resp.status_code == 200
 
 
@@ -101,7 +101,7 @@ class TestUpdateActivity:
         db.add(activity)
         db.commit()
         resp = client.patch(
-            f"/activities/{activity.id}",
+            f"/api/activities/{activity.id}",
             json={"title": "Updated Run", "distance": 6000},
             headers=headers,
         )
@@ -115,7 +115,7 @@ class TestUpdateActivity:
         db.add(activity)
         db.commit()
         resp = client.patch(
-            f"/activities/{activity.id}", json={"title": "Hacked"}, headers=second_user_auth[1]
+            f"/api/activities/{activity.id}", json={"title": "Hacked"}, headers=second_user_auth[1]
         )
         assert resp.status_code == 404
 
@@ -126,7 +126,7 @@ class TestDeleteActivity:
         activity = Activity(owner_id=user.id, title="Run", sport_type=SportType.RUN)
         db.add(activity)
         db.commit()
-        resp = client.delete(f"/activities/{activity.id}", headers=headers)
+        resp = client.delete(f"/api/activities/{activity.id}", headers=headers)
         assert resp.status_code == 204
 
     def test_delete_activity_not_owner(self, client, db, auth_user, second_user_auth):
@@ -134,7 +134,7 @@ class TestDeleteActivity:
         activity = Activity(owner_id=user.id, title="Run", sport_type=SportType.RUN)
         db.add(activity)
         db.commit()
-        resp = client.delete(f"/activities/{activity.id}", headers=second_user_auth[1])
+        resp = client.delete(f"/api/activities/{activity.id}", headers=second_user_auth[1])
         assert resp.status_code == 404
 
 
@@ -158,7 +158,7 @@ class TestListActivities:
             )
         )
         db.commit()
-        resp = client.get("/activities/", headers=headers)
+        resp = client.get("/api/activities/", headers=headers)
         assert resp.status_code == 200
         titles = [a["title"] for a in resp.json()]
         assert "Run 1" in titles
@@ -183,7 +183,7 @@ class TestListActivities:
             )
         )
         db.commit()
-        resp = client.get("/activities/?sport_type=run", headers=headers)
+        resp = client.get("/api/activities/?sport_type=run", headers=headers)
         assert resp.status_code == 200
         assert all(a["sport_type"] == "run" for a in resp.json())
 
@@ -200,5 +200,5 @@ class TestUserActivities:
             )
         )
         db.commit()
-        resp = client.get(f"/users/{user.id}/activities", headers=headers)
+        resp = client.get(f"/api/users/{user.id}/activities", headers=headers)
         assert resp.status_code == 200
