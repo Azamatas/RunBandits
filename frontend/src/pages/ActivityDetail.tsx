@@ -79,7 +79,7 @@ export default function ActivityDetail() {
     ? fmt(Math.round(activity.duration / (activity.distance / 1000)))
     : null;
   const sportType = activity.sport_type;
-  const taggedIds = activity.tagged_athlete_ids ?? [];
+  const taggedAthletes = activity.tagged_athletes ?? [];
   const hasMap = !!activity.polyline;
 
   return (
@@ -160,20 +160,22 @@ export default function ActivityDetail() {
           )}
         </div>
 
-        {taggedIds.length > 0 && (
+        {taggedAthletes.length > 0 && (
           <div className="tagged-row" style={{ padding: "0 24px 16px", borderTop: "none" }}>
-            {taggedIds.map((tid) => (
-              <div
-                key={tid}
+            <span style={{ color: "var(--text-muted)", fontSize: "var(--text-sm)" }}>with</span>
+            {taggedAthletes.map((a) => (
+              <Link
+                key={a.id}
+                to={`/users/${a.id}`}
                 className="avatar avatar-sm"
-                style={{ background: AVATAR_COLORS[tid % AVATAR_COLORS.length] }}
-                title={`Athlete #${tid}`}
+                style={{ background: AVATAR_COLORS[a.id % AVATAR_COLORS.length], textDecoration: "none" }}
+                title={a.username}
               >
-                {String.fromCharCode(65 + (tid % 26))}
-              </div>
+                {a.username[0]?.toUpperCase() ?? "?"}
+              </Link>
             ))}
-            <span style={{ marginLeft: 8 }}>
-              {taggedIds.length} tagged athlete{taggedIds.length !== 1 ? "s" : ""}
+            <span style={{ fontSize: "var(--text-sm)" }}>
+              {taggedAthletes.map((a) => a.username).join(", ")}
             </span>
           </div>
         )}

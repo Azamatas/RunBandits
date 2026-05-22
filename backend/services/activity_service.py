@@ -19,7 +19,11 @@ logger = logging.getLogger("runbanditsrun.services.activity")
 
 
 def _query_activities_with_relations(db: Session) -> Query[Activity]:
-    return db.query(Activity).options(selectinload(Activity.owner), selectinload(Activity.kudos))
+    return db.query(Activity).options(
+        selectinload(Activity.owner),
+        selectinload(Activity.kudos),
+        selectinload(Activity.tagged_athletes),
+    )
 
 
 def _get_friend_ids_subquery(viewer_id: int) -> CompoundSelect[tuple[int]]:
@@ -79,6 +83,7 @@ def enrich_activity(activity: Activity, user_id: int) -> ActivityOut:
         "kudos_count": len(activity.kudos),
         "owner_username": activity.owner.username,
         "user_has_kudos": any(k.user_id == user_id for k in activity.kudos),
+        "tagged_athletes": [{"id": u.id, "username": u.username} for u in activity.tagged_athletes],
     })
 
 

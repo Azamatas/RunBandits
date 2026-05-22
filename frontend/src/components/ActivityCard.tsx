@@ -103,6 +103,23 @@ export default function ActivityCard({ activity, queryKey, style }: ActivityCard
           {activity.title}
         </Link>
 
+        {activity.tagged_athletes && activity.tagged_athletes.length > 0 && (
+          <div className="activity-card-tagged">
+            <span className="activity-card-tagged-label">with</span>
+            {activity.tagged_athletes.map((a, i) => (
+              <span key={a.id}>
+                <Link
+                  to={`/users/${a.id}`}
+                  style={{ color: "inherit", textDecoration: "none", fontWeight: 600 }}
+                >
+                  {a.username}
+                </Link>
+                {i < activity.tagged_athletes!.length - 1 ? ", " : ""}
+              </span>
+            ))}
+          </div>
+        )}
+
         <div className="activity-card-stats">
           {activity.distance != null && (
             <div className="stat-inline">

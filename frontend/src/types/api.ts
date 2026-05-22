@@ -26,7 +26,12 @@ export interface Activity {
   created_at: string;
   kudos_count: number;
   user_has_kudos: boolean;
-  tagged_athlete_ids?: number[];
+  tagged_athletes?: TaggedAthlete[];
+}
+
+export interface TaggedAthlete {
+  id: number;
+  username: string;
 }
 
 export interface ActivityCreatePayload {

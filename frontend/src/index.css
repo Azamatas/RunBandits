@@ -922,6 +922,17 @@ input::placeholder, textarea::placeholder { color: var(--text-muted); }
 
 .activity-card-stats { display: flex; gap: 24px; margin-bottom: 16px; flex-wrap: wrap; }
 
+.activity-card-tagged {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  margin-bottom: 12px;
+  line-height: 1.4;
+}
+
+.activity-card-tagged-label {
+  margin-right: 4px;
+}
+
 .activity-card-footer {
   display: flex;
   align-items: center;
@@ -1475,8 +1486,8 @@ input::placeholder, textarea::placeholder { color: var(--text-muted); }
   color: var(--text-muted);
 }
 
-.tagged-row .avatar { margin-left: -6px; border: 2px solid var(--bg-card); }
-.tagged-row .avatar:first-child { margin-left: 0; }
+.tagged-row .avatar { border: 2px solid var(--bg-card); }
+.tagged-row .avatar + .avatar { margin-left: -6px; }
 
 
 

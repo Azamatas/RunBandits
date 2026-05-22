@@ -8,6 +8,13 @@ from backend.models.activity import SportType, Visibility
 Int32 = Annotated[int, Field(ge=0, le=2147483647)]
 
 
+class TaggedAthlete(BaseModel):
+    id: int
+    username: str
+
+    model_config = {"from_attributes": True}
+
+
 class ActivityCreate(BaseModel):
     title: str = Field(min_length=1, max_length=200)
     sport_type: SportType
@@ -33,6 +40,7 @@ class ActivityOut(BaseModel):
     created_at: datetime
     kudos_count: int = 0
     user_has_kudos: bool = False
+    tagged_athletes: list[TaggedAthlete] = []
 
     model_config = {"from_attributes": True}
 

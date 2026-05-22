@@ -167,24 +167,35 @@ export default function AddActivity() {
               onChange={(e) => setTagSearch(e.target.value)}
               placeholder="Search friends to tag..."
             />
-            {tagSearch && availableFriends.length > 0 && (
+            {tagSearch && (
               <div style={{ border: "1px solid var(--border)", borderRadius: "var(--radius-md)", marginTop: 4, maxHeight: 150, overflowY: "auto" }}>
-                {availableFriends.map((f) => (
-                  <button
-                    type="button"
-                    key={f.id}
-                    onClick={() => addTag(f.id)}
-                    style={{
-                      display: "block", width: "100%", textAlign: "left",
-                      padding: "8px 12px", background: "none", border: "none",
-                      fontSize: "var(--text-sm)", cursor: "pointer", fontFamily: "var(--font)",
-                    }}
-                    onMouseEnter={(e) => ((e.target as HTMLElement).style.background = "var(--gray-50)")}
-                    onMouseLeave={(e) => ((e.target as HTMLElement).style.background = "none")}
-                  >
-                    {f.username}
-                  </button>
-                ))}
+                {availableFriends.length > 0 ? (
+                  availableFriends.map((f) => (
+                    <button
+                      type="button"
+                      key={f.id}
+                      onClick={() => addTag(f.id)}
+                      style={{
+                        display: "block", width: "100%", textAlign: "left",
+                        padding: "8px 12px", background: "none", border: "none",
+                        fontSize: "var(--text-sm)", cursor: "pointer", fontFamily: "var(--font)",
+                      }}
+                      onMouseEnter={(e) => ((e.target as HTMLElement).style.background = "var(--gray-50)")}
+                      onMouseLeave={(e) => ((e.target as HTMLElement).style.background = "none")}
+                    >
+                      {f.username}
+                    </button>
+                  ))
+                ) : (
+                  <div style={{ padding: "8px 12px", fontSize: "var(--text-sm)", color: "var(--text-muted)", fontStyle: "italic" }}>
+                    No friends match "{tagSearch}".
+                  </div>
+                )}
+              </div>
+            )}
+            {!tagSearch && taggedIds.length === 0 && (
+              <div style={{ marginTop: 6, fontSize: "var(--text-xs)", color: "var(--text-muted)" }}>
+                No friends tagged yet — type to search your crew.
               </div>
             )}
             {taggedIds.length > 0 && (
