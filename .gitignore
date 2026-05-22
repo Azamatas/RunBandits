@@ -37,6 +37,7 @@ Desktop.ini
 
 # Build output
 *.db
+!Dockerfile.db
 
 # Logs
 logs/
