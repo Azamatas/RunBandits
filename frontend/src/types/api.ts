@@ -20,7 +20,6 @@ export interface Activity {
   sport_type: SportType;
   distance: number | null;
   duration: number | null;
-  elevation: number | null;
   polyline: string | null;
   visibility: Visibility;
   started_at: string | null;
@@ -35,7 +34,6 @@ export interface ActivityCreatePayload {
   sport_type: SportType;
   distance?: number | null;
   duration?: number | null;
-  elevation?: number | null;
   polyline?: string | null;
   visibility?: Visibility;
   started_at?: string | null;
@@ -77,7 +75,6 @@ export interface FriendRequest {
 export interface SportTotals {
   count: number;
   total_distance: number;
-  total_elevation: number | null;
   total_duration: number;
 }
 

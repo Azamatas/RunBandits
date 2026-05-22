@@ -130,9 +130,6 @@ export default function Profile() {
                         </div>
                         <div style={{ marginTop: 8, fontSize: "0.75rem", color: "var(--text-muted)" }}>
                           {(data.total_distance / 1000).toFixed(1)} km
-                          {data.total_elevation != null && data.total_elevation > 0 && (
-                            <> · {data.total_elevation.toFixed(0)}m elev</>
-                          )}
                         </div>
                       </div>
                     );

@@ -48,7 +48,6 @@ class Activity(Base):
     )
     distance: Mapped[float | None] = mapped_column(Float)
     duration: Mapped[int | None] = mapped_column(Integer)
-    elevation: Mapped[float | None] = mapped_column(Float)
     polyline: Mapped[str | None] = mapped_column(Text)
     path: Mapped[Any] = mapped_column(Geometry(geometry_type="LINESTRING", srid=PATH_SRID))
     visibility: Mapped[Visibility] = mapped_column(

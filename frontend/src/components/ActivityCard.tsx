@@ -116,12 +116,6 @@ export default function ActivityCard({ activity, queryKey, style }: ActivityCard
               <span className="stat-label">time</span>
             </div>
           )}
-          {activity.elevation != null && (
-            <div className="stat-inline">
-              <span className="stat-value">{activity.elevation}</span>
-              <span className="stat-label">m elev</span>
-            </div>
-          )}
           {pace && (
             <div className="stat-inline">
               <span className="stat-value">{pace}</span>

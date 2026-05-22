@@ -88,7 +88,6 @@ class ActivityCreateData:
     sport_type: SportType
     distance: float | None = None
     duration: int | None = None
-    elevation: float | None = None
     polyline: str | None = None
     visibility: Visibility = Visibility.PUBLIC
     started_at: datetime | None = None
@@ -100,7 +99,6 @@ class ActivityUpdateData:
     sport_type: SportType | None = None
     distance: float | None = None
     duration: int | None = None
-    elevation: float | None = None
     polyline: str | None = None
     visibility: Visibility | None = None
     started_at: datetime | None = None

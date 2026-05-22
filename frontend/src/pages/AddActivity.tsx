@@ -107,7 +107,6 @@ export default function AddActivity() {
       ...form,
       distance: form.distance ? parseFloat(form.distance) * 1000 : null,
       duration: form.duration ? parseInt(form.duration) * 60 : null,
-      elevation: null,
       polyline: form.polyline || null,
       tagged_athlete_ids: taggedIds,
     });

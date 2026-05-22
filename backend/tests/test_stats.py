@@ -11,7 +11,6 @@ class TestStats:
                 sport_type=SportType.RUN,
                 distance=5000,
                 duration=1800,
-                elevation=50,
             )
         )
         db.commit()

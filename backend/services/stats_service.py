@@ -29,7 +29,6 @@ def get_totals(
         visible.c.sport_type,
         func.count(visible.c.id).label("count"),
         func.sum(visible.c.distance).label("total_distance"),
-        func.sum(visible.c.elevation).label("total_elevation"),
         func.sum(visible.c.duration).label("total_duration"),
     )
     if sport_type:
@@ -40,7 +39,6 @@ def get_totals(
         row.sport_type: StatsTotals(
             count=row.count,
             total_distance=row.total_distance or 0,
-            total_elevation=row.total_elevation or 0,
             total_duration=row.total_duration or 0,
         )
         for row in rows
@@ -121,14 +119,5 @@ def get_personal_records(
                 achieved_at=fastest.started_at or fastest.created_at,
             ))
 
-        climb = _best_by(db, user_id, viewer_id, sport, Activity.elevation, "desc")
-        if climb and climb.elevation and climb.elevation > 0:
-            records.append(PersonalRecord(
-                sport_type=sport,
-                record_type="biggest_climb",
-                value=float(climb.elevation),
-                activity_id=climb.id,
-                achieved_at=climb.started_at or climb.created_at,
-            ))
 
     return records

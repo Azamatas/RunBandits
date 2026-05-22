@@ -53,58 +53,50 @@ const POLYLINES = {
 export let activities = [
   {
     id: 1, owner_id: 1, title: "Morning trail run — Forest Park",
-    sport_type: "run", distance: 8500, duration: 2700, elevation: 210,
-    polyline: POLYLINES.forest_park, visibility: "public",
+    sport_type: "run", distance: 8500, duration: 2700,     polyline: POLYLINES.forest_park, visibility: "public",
     started_at: "2025-05-12T06:30:00Z", created_at: "2025-05-12T07:15:00Z",
     kudos_count: 3, tagged_athlete_ids: [4],
   },
   {
     id: 2, owner_id: 2, title: "Weekend century ride",
-    sport_type: "ride", distance: 162000, duration: 18000, elevation: 1450,
-    polyline: POLYLINES.hawthorne, visibility: "public",
+    sport_type: "ride", distance: 162000, duration: 18000,    polyline: POLYLINES.hawthorne, visibility: "public",
     started_at: "2025-05-11T07:00:00Z", created_at: "2025-05-11T12:00:00Z",
     kudos_count: 12, tagged_athlete_ids: [],
   },
 
   {
     id: 3, owner_id: 1, title: "Easy recovery jog",
-    sport_type: "run", distance: 5000, duration: 1800, elevation: 30,
-    polyline: POLYLINES.waterfront, visibility: "public",
+    sport_type: "run", distance: 5000, duration: 1800,    polyline: POLYLINES.waterfront, visibility: "public",
     started_at: "2025-05-09T07:00:00Z", created_at: "2025-05-09T07:30:00Z",
     kudos_count: 0, tagged_athlete_ids: [],
   },
   {
     id: 4, owner_id: 2, title: "Lunch walk",
-    sport_type: "walk", distance: 3200, duration: 2400, elevation: 15,
-    polyline: null, visibility: "public",
+    sport_type: "walk", distance: 3200, duration: 2400,    polyline: null, visibility: "public",
     started_at: "2025-05-08T12:00:00Z", created_at: "2025-05-08T12:40:00Z",
     kudos_count: 2, tagged_athlete_ids: [],
   },
   {
     id: 5, owner_id: 1, title: "Mt. Tabor hike",
-    sport_type: "hike", distance: 14000, duration: 14400, elevation: 890,
-    polyline: POLYLINES.tabor, visibility: "friends",
+    sport_type: "hike", distance: 14000, duration: 14400,    polyline: POLYLINES.tabor, visibility: "friends",
     started_at: "2025-05-06T08:00:00Z", created_at: "2025-05-06T12:00:00Z",
     kudos_count: 7, tagged_athlete_ids: [2, 4],
   },
   {
     id: 6, owner_id: 4, title: "Sunrise summit push",
-    sport_type: "hike", distance: 11000, duration: 10800, elevation: 720,
-    polyline: POLYLINES.tabor, visibility: "public",
+    sport_type: "hike", distance: 11000, duration: 10800,    polyline: POLYLINES.tabor, visibility: "public",
     started_at: "2025-05-05T05:00:00Z", created_at: "2025-05-05T08:00:00Z",
     kudos_count: 9, tagged_athlete_ids: [1],
   },
   {
     id: 7, owner_id: 5, title: "Tempo 10K",
-    sport_type: "run", distance: 10000, duration: 2520, elevation: 45,
-    polyline: POLYLINES.waterfront, visibility: "public",
+    sport_type: "run", distance: 10000, duration: 2520,    polyline: POLYLINES.waterfront, visibility: "public",
     started_at: "2025-05-04T07:00:00Z", created_at: "2025-05-04T07:42:00Z",
     kudos_count: 5, tagged_athlete_ids: [],
   },
   {
     id: 8, owner_id: 7, title: "Evening spin",
-    sport_type: "ride", distance: 25000, duration: 3600, elevation: 120,
-    polyline: POLYLINES.hawthorne, visibility: "public",
+    sport_type: "ride", distance: 25000, duration: 3600,    polyline: POLYLINES.hawthorne, visibility: "public",
     started_at: "2025-05-03T18:00:00Z", created_at: "2025-05-03T19:00:00Z",
     kudos_count: 3, tagged_athlete_ids: [],
   },
@@ -114,10 +106,10 @@ export let activities = [
 
 export const stats = {
   totals: {
-    run: { count: 2, total_distance: 13500, total_elevation: 240 },
-    ride: { count: 0, total_distance: 0, total_elevation: 0 },
-    walk: { count: 0, total_distance: 0, total_elevation: 0 },
-    hike: { count: 1, total_distance: 14000, total_elevation: 890 },
+    run: { count: 2, total_distance: 13500 },
+    ride: { count: 0, total_distance: 0 },
+    walk: { count: 0, total_distance: 0 },
+    hike: { count: 1, total_distance: 14000 },
   },
   personal_records: {
     fastest_5k: 1500,

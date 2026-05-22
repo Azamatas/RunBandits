@@ -10,7 +10,6 @@ export function activityPayload(overrides = {}) {
     sport_type: "run",
     distance: 5,
     duration: 30,
-    elevation: 50,
     visibility: "public",
     ...overrides,
   };

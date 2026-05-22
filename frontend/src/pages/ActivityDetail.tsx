@@ -158,12 +158,6 @@ export default function ActivityDetail() {
               <div className="detail-stat-label">Pace /km</div>
             </div>
           )}
-          {activity.elevation != null && (
-            <div className="detail-stat">
-              <div className="detail-stat-value">{activity.elevation}</div>
-              <div className="detail-stat-label">Elevation (m)</div>
-            </div>
-          )}
         </div>
 
         {taggedIds.length > 0 && (

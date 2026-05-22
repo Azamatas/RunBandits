@@ -13,7 +13,6 @@ class ActivityCreate(BaseModel):
     sport_type: SportType
     distance: float | None = Field(default=None, ge=0)
     duration: Int32 | None = None
-    elevation: float | None = Field(default=None, ge=0)
     polyline: str | None = Field(default=None, max_length=100000)
     visibility: Visibility = Visibility.PUBLIC
     started_at: datetime | None = None
@@ -28,7 +27,6 @@ class ActivityOut(BaseModel):
     sport_type: SportType
     distance: float | None
     duration: int | None
-    elevation: float | None
     polyline: str | None
     visibility: Visibility
     started_at: datetime | None
@@ -44,7 +42,6 @@ class ActivityUpdate(BaseModel):
     sport_type: SportType | None = None
     distance: float | None = Field(default=None, ge=0)
     duration: Int32 | None = None
-    elevation: float | None = Field(default=None, ge=0)
     polyline: str | None = Field(default=None, max_length=100000)
     visibility: Visibility | None = None
     started_at: datetime | None = None

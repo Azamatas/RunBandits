@@ -30,7 +30,6 @@ CREATE TABLE IF NOT EXISTS activities (
     sport_type sport_type NOT NULL,
     distance FLOAT,
     duration INTEGER,
-    elevation FLOAT,
     polyline TEXT,
     path GEOMETRY(LineString, 3857),
     visibility visibility DEFAULT 'public',

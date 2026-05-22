@@ -9,7 +9,6 @@ from backend.models.activity import SportType
 class StatsTotals(BaseModel):
     count: int
     total_distance: float
-    total_elevation: float
     total_duration: int
 
 
@@ -18,7 +17,6 @@ RecordType = Literal[
     "longest_duration",
     "fastest_pace",
     "fastest_speed",
-    "biggest_climb",
 ]
 
 

@@ -54,7 +54,6 @@ export async function createActivityForUser(request, accessToken, overrides = {}
     ...activityPayload(overrides),
     distance: 5000,
     duration: 1800,
-    elevation: 100,
   };
   const res = await request.post("http://localhost:8000/activities", {
     headers: { Authorization: `Bearer ${accessToken}` },
