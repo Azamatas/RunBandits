@@ -497,7 +497,7 @@
 </section>
 
 <!-- 2. What is it -->
-<section>
+<section style="position:relative;">
   <h2>What is it?</h2>
   <div style="display:grid;grid-template-columns:4fr 2fr;gap:32px;align-items:start;position:relative;z-index:1;">
     <div>
@@ -512,6 +512,7 @@
       <p style="font-size:1.1em;font-weight:800;margin:0;font-family:var(--font-heading);color:var(--accent);">Strava</p>
     </div>
   </div>
+  <img src="swiper.jpg" alt="" style="position:absolute;bottom:40px;right:0;max-height:38vh;width:auto;transform:scaleX(-1);pointer-events:none;z-index:0;" />
 </section>
 
 <!-- <section>
@@ -548,20 +549,6 @@
 <section>
   <h2>Database Schema</h2>
   <img src="schema.png" style="max-height:78vh;width:100%;height:auto;border-radius:var(--radius-md);box-shadow:var(--shadow-md);border:1px solid var(--border);object-fit:contain;display:block;" />
-</section>
-
-<!-- 5. Schema design decisions -->
-<section style="position:relative;">
-  <h2>Schema Design Decisions</h2>
-  <ul>
-    <li>Enum types for <span class="pill">sport_type</span> <span class="pill">visibility</span> <span class="pill">friendship_status</span> &mdash; DB-level validation</li>
-    <li><code>ON DELETE CASCADE</code> on all FK &mdash; no orphaned rows</li>
-    <li><code>GEOMETRY(LineString, 3857)</code> &mdash; Web Mercator so distances are in metres</li>
-    <li><code>UNIQUE(activity_id, user_id)</code> on <code>kudos</code> &mdash; one kudo per activity per user</li>
-    <li><code>UNIQUE(requester_id, addressee_id)</code> &mdash; no duplicate friend requests</li>
-    <li><code>activity_athletes</code> &mdash; pure join table, composite PK, no extra id needed</li>
-  </ul>
-  <img src="swiper.jpg" alt="" style="position:absolute;bottom:-20px;right:0;max-height:38vh;width:auto;transform:scaleX(-1);pointer-events:none;" />
 </section>
 
 <!-- 6. Main feature: route matching -->
@@ -750,7 +737,8 @@ ORDER BY a.started_at DESC;</code></pre>
   </div>
 </section>
 
-
+<!-- 9. End -->
+<section data-background-image="end.png" data-background-size="contain" data-background-color="#000"></section>
 
 </div>
 </div>
@@ -759,7 +747,7 @@ ORDER BY a.started_at DESC;</code></pre>
 <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/highlight.js"></script>
 <script>
   Reveal.initialize({
-    hash: true,
+    hash: false,
     transition: 'slide',
     transitionSpeed: 'fast',
     backgroundTransition: 'fade',
