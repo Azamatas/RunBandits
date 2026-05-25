@@ -315,6 +315,35 @@
     .index-table tr:hover td { background: var(--gray-50); }
     .index-table code { background: var(--gray-50); border-color: var(--gray-200); }
 
+    .results-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.62em;
+      margin-top: 4px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      background: var(--bg);
+    }
+
+    .results-table th {
+      background: var(--accent-light);
+      color: var(--accent);
+      padding: 5px 8px;
+      text-align: left;
+      font-weight: 700;
+      font-size: 0.9em;
+    }
+
+    .results-table td {
+      padding: 3px 8px;
+      border-bottom: 1px solid var(--gray-100);
+      color: var(--gray-700);
+      white-space: nowrap;
+    }
+
+    .results-table tr:last-child td { border-bottom: none; }
+
     .highlight-box {
       background: var(--accent-light);
       border-left: 4px solid var(--accent);
@@ -800,7 +829,27 @@ GROUP BY a.id, u.username, a.distance, a.duration, a.started_at
 ORDER BY a.started_at DESC;</code></pre>
     </div>
     </div>
-    <div></div>
+    <div>
+      <table class="results-table">
+        <thead><tr><th>id</th><th>Title</th><th>Athlete</th><th>km</th><th>kudos</th></tr></thead>
+        <tbody>
+          <tr><td>4</td><td>Mount Tam ride</td><td>bob_cyclist</td><td>56.0</td><td>5</td></tr>
+          <tr><td>11</td><td>Central Park Walk</td><td>eve_walker</td><td>5.0</td><td>0</td></tr>
+          <tr><td>1</td><td>Morning Long Run</td><td>alice_runner</td><td>16.5</td><td>3</td></tr>
+          <tr><td>13</td><td>5K Race</td><td>frank_runner</td><td>5.0</td><td>2</td></tr>
+          <tr><td>12</td><td>Hudson River Greenway</td><td>eve_walker</td><td>3.8</td><td>0</td></tr>
+          <tr><td>5</td><td>Golden Gate Bridge loops</td><td>bob_cyclist</td><td>42.3</td><td>3</td></tr>
+          <tr><td>2</td><td>Tempo Run on Esplanade</td><td>alice_runner</td><td>8.2</td><td>1</td></tr>
+          <tr><td>14</td><td>Lakefront 10K</td><td>frank_runner</td><td>10.0</td><td>3</td></tr>
+          <tr><td>9</td><td>Longs Peak Ascent</td><td>diana_hiker</td><td>14.5</td><td>5</td></tr>
+          <tr><td>10</td><td>Rocky Mountain NP Trail</td><td>diana_hiker</td><td>8.7</td><td>1</td></tr>
+          <tr><td>15</td><td>Ironman Training - Long Bike</td><td>grace_triathlete</td><td>112.0</td><td>6</td></tr>
+          <tr><td>17</td><td>Brick Workout - Bike to Run</td><td>grace_triathlete</td><td>10.0</td><td>2</td></tr>
+          <tr><td>18</td><td>Gravel Century</td><td>henry_cyclist</td><td>100.0</td><td>4</td></tr>
+          <tr><td>19</td><td>Forest Park Loops</td><td>henry_cyclist</td><td>25.5</td><td>0</td></tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </section>
 
