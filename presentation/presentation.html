@@ -58,7 +58,7 @@
     .reveal {
       font-family: var(--font);
       color: var(--text);
-      font-size: 26px;
+      font-size: 48px;
     }
 
     .reveal .slides>section {
@@ -201,7 +201,7 @@
 
     .reveal ul li {
       position: relative;
-      padding-left: 24px;
+      padding-left: 48px;
       margin: 12px 0;
       color: var(--gray-700);
       line-height: 1.6;
@@ -537,7 +537,7 @@
   <img src="schema.svg" style="max-width:100%; max-height:80vh; width:auto; height:auto; object-fit:contain; display:block;"/>
 </section>
 
-<section class="slide-with-bg" style="padding-top:50px !important;justify-content:start;">
+<section class="slide-with-bg" style="padding-top:50px !important;justify-content:start;font-size:36px;">
   <div class="bg-art" aria-hidden="true" style="opacity:0.3;">
     <svg viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
       <g fill="none" stroke-width="4" stroke-linecap="round">
@@ -572,12 +572,12 @@
   <div class="two-col" style="grid-template-columns: 1fr 1fr;position:relative;z-index:1;">
     <div>
       <ul>
-        <li>Users can add common routes (e.g. popular running paths)</li>
-        <li>Previous and future activities are linked to these common routes based on similarity</li>
+        <li>Users can add common routes<br>(e.g. popular running paths)</li>
+        <li>Previous and future activities are linked to<br>these common routes based on similarity</li>
         <li>Leaderboards are built for each common route</li>
       </ul>
       <div class="highlight-box">
-        Using <strong>Fréchet Distance</strong> which measures similarity between two curves
+        Using <strong>Fréchet Distance</strong><br>which measures similarity between two curves
       </div>
       <div class="highlight-box" style="margin-top:0.3em;">
         App uses <strong>SQLAlchemy ORM</strong>, equivalent SQL is shown
