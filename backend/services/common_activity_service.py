@@ -179,7 +179,11 @@ def get_leaderboard(db: Session, common_activity_id: int, limit: int = 10) -> li
         )
         .join(User, User.id == Activity.owner_id)
         .join(CommonActivity, CommonActivity.id == Activity.common_activity_id)
-        .filter(CommonActivity.id == common_activity_id, Activity.duration.isnot(None))
+        .filter(
+            CommonActivity.id == common_activity_id,
+            Activity.duration.isnot(None),
+            # Activity.visibility == 'public',
+        )
         .group_by(User.id, User.username)
         .order_by(func.min(Activity.duration))
         .limit(limit)
