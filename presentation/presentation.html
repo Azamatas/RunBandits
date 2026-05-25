@@ -673,7 +673,7 @@ FOR EACH ROW EXECUTE FUNCTION update_common_activity_path();</code></pre>
   </div>
 </section>
 
-<section class="slide-with-bg" style="padding-top:50px !important;justify-content:start;font-size:36px;">
+<section class="slide-with-bg" style="padding-top:50px !important;justify-content:start;">
   <div class="bg-art" aria-hidden="true" style="opacity:0.3;">
     <svg viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
       <g fill="none" stroke-width="4" stroke-linecap="round">
@@ -706,7 +706,7 @@ FOR EACH ROW EXECUTE FUNCTION update_common_activity_path();</code></pre>
   </div>
   <h2 style="position:relative;top:auto;left:auto;">Killer Feature: Common Activities</h2>
   <div class="two-col" style="grid-template-columns: 1fr 1fr;position:relative;z-index:1;">
-    <div>
+    <div style="font-size: 36px;">
       <ul>
         <li>Users can add common routes<br>(e.g. popular running paths)</li>
         <li>Previous and future activities are linked to<br>these common routes based on similarity</li>
@@ -730,6 +730,7 @@ RETURNING id, path;
 SELECT 1 FROM common_activities ca
 WHERE ca.sport_type = 'run'
   AND ca.id != :ca_id
+  AND ST_DWithin(ca.path,:ca_path,100)
   AND ST_FrechetDistance(ca.path,:ca_path,0.05)<25;
 
 -- 3. Bulk-link matching activities
@@ -739,6 +740,7 @@ WHERE id IN (
   WHERE a.sport_type = 'run'
     AND a.common_activity_id IS NULL
     AND a.path IS NOT NULL
+    AND ST_DWithin(a.path,:ca_path,100)
     AND ST_FrechetDistance(a.path,:ca_path,0.05)<25
 );</code></pre>
     </div>
