@@ -6,7 +6,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reset.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/white.css" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/monokai.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/atom-one-light.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Fredoka:wght@600;700;800&display=swap" rel="stylesheet" />
@@ -78,14 +78,44 @@
     }
 
     .reveal h2 {
-      font-size: 1.6em;
+      font-size: clamp(1.2em, 2.5vw, 1.6em);
       font-weight: 800;
       border-bottom: 3px solid var(--accent);
       padding-bottom: 12px;
-      margin-bottom: 32px;
       display: inline-block;
       text-align: left;
+      max-width: calc(100% - 96px);
+      white-space: nowrap;
+      position: absolute;
+      top: 40px;
+      left: 48px;
+      margin: 0;
+      z-index: 20;
     }
+
+    .reveal .slides > section:has(> h2),
+    .reveal .slides > section > section:has(> h2) {
+      padding-top: 120px;
+      box-sizing: border-box;
+    }
+
+    .reveal .slide-number {
+      position: fixed;
+      bottom: 20px;
+      left: 24px;
+      right: auto;
+      top: auto;
+      background: transparent;
+      color: var(--gray-400);
+      font-family: var(--font);
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      padding: 0;
+      pointer-events: none;
+      z-index: 30;
+    }
+    .reveal .slide-number a { color: inherit; }
 
     .reveal .slides>section {
       text-align: left;
@@ -101,20 +131,60 @@
     .reveal strong { color: var(--text); }
 
     .reveal pre {
-      box-shadow: var(--shadow-md);
-      border: 1px solid var(--border);
+      box-shadow: 0 10px 30px rgba(252, 76, 2, 0.08), 0 4px 12px rgba(0,0,0,0.06);
+      border: 1px solid var(--orange-100);
       border-radius: var(--radius-md);
       width: 100%;
       margin: 16px 0;
+      background: linear-gradient(180deg, #fffaf6 0%, #fefcfa 100%);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .reveal pre::before {
+      content: "SQL";
+      position: absolute;
+      top: 10px;
+      right: 14px;
+      font-family: var(--font);
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      color: var(--accent);
+      background: var(--accent-light);
+      padding: 3px 8px;
+      border-radius: var(--radius-full);
+      border: 1px solid var(--orange-200);
+      z-index: 2;
+    }
+
+    .reveal pre::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent) 0%, var(--orange-300) 100%);
     }
 
     .reveal pre code {
       font-size: 0.65em;
       line-height: 1.6;
       border-radius: var(--radius-md);
-      padding: 20px;
-      background: #1e1e2e !important;
+      padding: 28px 22px 22px 22px;
+      background: transparent !important;
+      color: var(--gray-800);
+      font-family: 'JetBrains Mono', 'Fira Code', Menlo, Consolas, monospace;
     }
+
+    .reveal pre code .hljs-keyword,
+    .reveal pre code .hljs-built_in { color: var(--orange-700); font-weight: 700; }
+    .reveal pre code .hljs-string { color: #059669; }
+    .reveal pre code .hljs-number { color: #2563eb; }
+    .reveal pre code .hljs-comment { color: var(--gray-400); font-style: italic; }
+    .reveal pre code .hljs-function,
+    .reveal pre code .hljs-title { color: #7c3aed; }
 
     .reveal ul {
       list-style: none;
@@ -351,20 +421,37 @@
       font-weight: 600;
     }
 
-    .reveal .slide-number {
-      background: var(--accent);
-      color: #fff;
+    .reveal .progress { display: none !important; }
+
+    .reveal .slides > section:nth-child(n+3)::before {
+      content: "runbanditsrun.app";
+      position: absolute;
+      top: 14px;
+      left: 48px;
       font-family: var(--font);
-      font-weight: 700;
       font-size: 12px;
-      padding: 4px 10px;
-      border-radius: var(--radius-full);
-      right: 16px;
-      bottom: 16px;
+      font-weight: 700;
+      letter-spacing: 0.6px;
+      color: var(--gray-400);
+      text-transform: lowercase;
+      z-index: 25;
+      pointer-events: none;
     }
 
-    .reveal .progress { height: 4px; }
-    .reveal .progress span { background: var(--accent); }
+    .slide-with-bg { position: relative; overflow: hidden; }
+    .slide-with-bg .bg-art {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0.55;
+    }
+    .slide-with-bg .bg-art svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+    .slide-with-bg > h2 { position: absolute; }
 
     .reveal .controls button {
       color: var(--accent);
@@ -402,9 +489,9 @@
     </div>
     <p class="subtitle">Social Fitness Tracker - DB Course Project</p>
     <div class="team-names">
-      <span class="team-name">Name 1</span>
-      <span class="team-name">Name 2</span>
-      <span class="team-name">Name 3</span>
+      <span class="team-name">Azamat Amanbay</span>
+      <span class="team-name">Vorobev Mikhail</span>
+      <span class="team-name">Kanapelka Arseni</span>
     </div>
   </div>
 </section>
@@ -412,7 +499,7 @@
 <!-- 2. What is it -->
 <section>
   <h2>What is it?</h2>
-  <div style="display:grid;grid-template-columns:4fr 2fr;gap:32px;align-items:start;">
+  <div style="display:grid;grid-template-columns:4fr 2fr;gap:32px;align-items:start;position:relative;z-index:1;">
     <div>
       <ul>
         <li>Record runs, rides, walks, hikes with map routes</li>
@@ -424,15 +511,6 @@
       <p style="color:var(--gray-400);font-size:0.78em;margin:0 0 4px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;">Inspired by</p>
       <p style="font-size:1.1em;font-weight:800;margin:0;font-family:var(--font-heading);color:var(--accent);">Strava</p>
     </div>
-  </div>
-</section>
-
-<!-- 3. Demo -->
-<section>
-  <div class="title-slide">
-    <div class="demo-emoji">🏃</div>
-    <h2>Demo</h2>
-    <a class="demo-link" href="#">Watch demo video</a>
   </div>
 </section>
 
@@ -457,29 +535,69 @@
   </div>
 </section> -->
 
+<!-- 3. Project demo -->
+<section style="text-align:left;">
+  <h2 style="text-align:left;margin:0 0 16px 0;">Project Demo</h2>
+  <video controls style="max-height:70vh;width:85%;display:block;margin-left:0;border-radius:var(--radius-md);box-shadow:var(--shadow-md);border:1px solid var(--border);">
+    <source src="demo.mov" type="video/quicktime" />
+    Your browser does not support the video tag.
+  </video>
+</section>
+
 <!-- 4. Schema -->
 <section>
   <h2>Database Schema</h2>
-  <img src="schema_diagram.png" style="max-height:500px;border-radius:var(--radius-md);box-shadow:var(--shadow-md);border:1px solid var(--border);object-fit:contain;" />
+  <img src="schema.png" style="max-height:78vh;width:100%;height:auto;border-radius:var(--radius-md);box-shadow:var(--shadow-md);border:1px solid var(--border);object-fit:contain;display:block;" />
 </section>
 
 <!-- 5. Schema design decisions -->
-<section>
+<section style="position:relative;">
   <h2>Schema Design Decisions</h2>
   <ul>
     <li>Enum types for <span class="pill">sport_type</span> <span class="pill">visibility</span> <span class="pill">friendship_status</span> &mdash; DB-level validation</li>
     <li><code>ON DELETE CASCADE</code> on all FK &mdash; no orphaned rows</li>
     <li><code>GEOMETRY(LineString, 3857)</code> &mdash; Web Mercator so distances are in metres</li>
-    <li><code>UNIQUE(segment_id, activity_id)</code> &mdash; one effort per activity per segment</li>
+    <li><code>UNIQUE(activity_id, user_id)</code> on <code>kudos</code> &mdash; one kudo per activity per user</li>
     <li><code>UNIQUE(requester_id, addressee_id)</code> &mdash; no duplicate friend requests</li>
     <li><code>activity_athletes</code> &mdash; pure join table, composite PK, no extra id needed</li>
   </ul>
+  <img src="swiper.jpg" alt="" style="position:absolute;bottom:-20px;right:0;max-height:38vh;width:auto;transform:scaleX(-1);pointer-events:none;" />
 </section>
 
 <!-- 6. Main feature: route matching -->
-<section>
+<section class="slide-with-bg">
+  <div class="bg-art" aria-hidden="true" style="opacity:0.3;">
+    <svg viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+      <g fill="none" stroke-width="4" stroke-linecap="round">
+        <path d="M-30 560 C 300 480, 560 680, 840 580 S 1280 710, 1640 650" stroke="#fc4c02" opacity="0.6"/>
+        <path d="M-30 620 C 320 540, 580 740, 860 640 S 1300 760, 1640 700" stroke="#1e6cd9" opacity="0.5"/>
+      </g>
+      <g stroke="#a855f7" stroke-width="1.4" stroke-dasharray="4 5" opacity="0.55">
+        <line x1="160" y1="520" x2="160" y2="580"/>
+        <line x1="440" y1="570" x2="440" y2="630"/>
+        <line x1="720" y1="660" x2="720" y2="720"/>
+        <line x1="1020" y1="610" x2="1020" y2="670"/>
+        <line x1="1300" y1="680" x2="1300" y2="740"/>
+      </g>
+      <g fill="#fc4c02" opacity="0.6">
+        <circle cx="160" cy="520" r="5"/>
+        <circle cx="440" cy="570" r="5"/>
+        <circle cx="720" cy="660" r="5"/>
+        <circle cx="1020" cy="610" r="5"/>
+        <circle cx="1300" cy="680" r="5"/>
+      </g>
+      <g fill="#1e6cd9" opacity="0.55">
+        <circle cx="160" cy="580" r="5"/>
+        <circle cx="440" cy="630" r="5"/>
+        <circle cx="720" cy="720" r="5"/>
+        <circle cx="1020" cy="670" r="5"/>
+        <circle cx="1300" cy="740" r="5"/>
+      </g>
+      <text x="60" y="480" font-family="Inter,sans-serif" font-size="80" font-weight="800" fill="#fc4c02" opacity="0.07">&#948;(A,B)</text>
+    </svg>
+  </div>
   <h2>Main Feature: Route Matching</h2>
-  <div class="two-col">
+  <div class="two-col" style="position:relative;z-index:1;">
     <div>
       <p style="font-size:0.85em;">If two athletes run the <strong>same route</strong> &mdash; they appear in a shared leaderboard.</p>
       <div class="highlight-box">
@@ -488,7 +606,7 @@
       </div>
     </div>
     <div>
-      <pre><code class="language-sql" style="font-size:0.62em;">SELECT u.username, a.title,
+      <pre><code class="language-sql" style="font-size:0.82em;">SELECT u.username, a.title,
   TO_CHAR((a.duration||' seconds')
     ::INTERVAL, 'MI:SS') AS time,
   ROUND(ST_FrechetDistance(
@@ -496,7 +614,7 @@
     AS route_deviation_m,
   RANK() OVER (
     PARTITION BY u.id
-    ORDER BY a.duration)   AS personal_rank
+    ORDER BY a.duration) AS rank
 FROM common_activities ca
 JOIN activities a
   ON a.common_activity_id = ca.id
@@ -508,40 +626,99 @@ ORDER BY a.duration;</code></pre>
   </div>
 </section>
 
-<!-- 7. Segment leaderboard -->
-<section>
-  <h2>Segments &amp; Leaderboard</h2>
-  <div class="two-col">
+<!-- 7. Query 1: Insert activity linked to common route -->
+<section class="slide-with-bg">
+  <div class="bg-art" aria-hidden="true" style="opacity:0.28;">
+    <svg viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+      <defs>
+        <linearGradient id="trail7" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#fc4c02" stop-opacity="0.75"/>
+          <stop offset="100%" stop-color="#fdba74" stop-opacity="0.2"/>
+        </linearGradient>
+      </defs>
+      <path d="M-30 720 C 280 640, 520 760, 800 680 S 1240 560, 1640 600" stroke="url(#trail7)" stroke-width="5" fill="none" stroke-linecap="round"/>
+      <g fill="#fc4c02" opacity="0.55">
+        <circle cx="200" cy="680" r="6"/>
+        <circle cx="520" cy="755" r="6"/>
+        <circle cx="800" cy="680" r="6"/>
+        <circle cx="1080" cy="620" r="6"/>
+        <circle cx="1380" cy="600" r="6"/>
+      </g>
+      <g transform="translate(1340, 290)" opacity="0.5">
+        <circle cx="0" cy="0" r="48" fill="#fff7ed" stroke="#fc4c02" stroke-width="4"/>
+        <path d="M0 -22 L0 22 M-18 -4 L0 -22 L18 -4" stroke="#fc4c02" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      </g>
+      <text x="80" y="780" font-family="Inter,sans-serif" font-size="64" font-weight="800" fill="#fc4c02" opacity="0.07">INSERT</text>
+    </svg>
+  </div>
+  <h2>Insert Activity and Match Common Route</h2>
+  <div class="two-col" style="position:relative;z-index:1;">
     <div>
-      <p style="font-size:0.85em;">Timed segments on a route. Athletes compete for the fastest time.</p>
-      <ul>
-        <li>Each segment has a <code>path</code> geometry</li>
-        <li>Effort recorded per activity</li>
-        <li><code>RANK()</code> window function over best times</li>
-      </ul>
+      <p style="font-size:0.85em;">When a user uploads an activity, we auto-link it to a known <strong>common route</strong> if the path matches one.</p>
+      <div class="highlight-box">
+        Subquery picks the closest <code>common_activity</code> by <strong>Fréchet distance</strong>, pre-filtered by <code>ST_DWithin</code> (uses GIST index).
+      </div>
     </div>
     <div>
-      <pre><code class="language-sql" style="font-size:0.62em;">SELECT
-  u.username,
-  MIN(se.elapsed_time) AS best_time_sec,
-  TO_CHAR(
-    (MIN(se.elapsed_time)||' seconds')
-    ::INTERVAL, 'MI:SS')  AS best_time,
-  RANK() OVER (
-    ORDER BY MIN(se.elapsed_time)) AS rank
-FROM segment_efforts se
-JOIN users u ON u.id = se.athlete_id
-WHERE se.segment_id = 3001
-GROUP BY u.id, u.username
-ORDER BY best_time_sec;</code></pre>
+      <pre><code class="language-sql" style="font-size:0.78em;">INSERT INTO activities (
+  owner_id, title, sport_type,
+  distance, duration, polyline, path,
+  visibility, started_at,
+  common_activity_id
+)
+VALUES (
+  1001, 'Morning Run', 'run',
+  5400, 1620, :polyline,
+  ST_GeomFromText(:wkt, 3857),
+  'public', NOW(),
+  (SELECT ca.id
+   FROM common_activities ca
+   WHERE ST_DWithin(
+     ca.path,
+     ST_GeomFromText(:wkt, 3857),
+     100)
+   ORDER BY ST_FrechetDistance(
+     ca.path,
+     ST_GeomFromText(:wkt, 3857),
+     0.05) ASC
+   LIMIT 1)
+)
+RETURNING id, common_activity_id;</code></pre>
     </div>
   </div>
 </section>
 
-<!-- 8. Feed with access control -->
-<section>
-  <h2>Feed with Access Control</h2>
-  <div class="two-col">
+<!-- 8. Query 2: Friends feed -->
+<section class="slide-with-bg">
+  <div class="bg-art" aria-hidden="true" style="opacity:0.28;">
+    <svg viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+      <g stroke="#1e6cd9" stroke-width="1.8" opacity="0.55" fill="none">
+        <line x1="220" y1="220" x2="500" y2="340"/>
+        <line x1="500" y1="340" x2="340" y2="600"/>
+        <line x1="500" y1="340" x2="820" y2="460"/>
+        <line x1="820" y1="460" x2="1100" y2="300"/>
+        <line x1="820" y1="460" x2="1180" y2="680"/>
+        <line x1="1180" y1="680" x2="1400" y2="520"/>
+        <line x1="340" y1="600" x2="820" y2="460"/>
+        <line x1="1100" y1="300" x2="1400" y2="520"/>
+      </g>
+      <g>
+        <circle cx="220" cy="220" r="18" fill="#fc4c02" opacity="0.7"/>
+        <circle cx="500" cy="340" r="22" fill="#1e6cd9" opacity="0.65"/>
+        <circle cx="340" cy="600" r="18" fill="#16a34a" opacity="0.6"/>
+        <circle cx="820" cy="460" r="26" fill="#fc4c02" opacity="0.72"/>
+        <circle cx="1100" cy="300" r="18" fill="#9333ea" opacity="0.55"/>
+        <circle cx="1180" cy="680" r="20" fill="#1e6cd9" opacity="0.6"/>
+        <circle cx="1400" cy="520" r="17" fill="#fc4c02" opacity="0.55"/>
+      </g>
+      <g fill="#fc4c02" opacity="0.22" transform="translate(140, 740) scale(1.4)">
+        <path d="M0 0 c-7-12-26-12-26 4 c0 14 26 26 26 26 c0 0 26-12 26-26 c0-16-19-16-26-4z"/>
+      </g>
+      <text x="1000" y="820" font-family="Inter,sans-serif" font-size="64" font-weight="800" fill="#1e6cd9" opacity="0.07">FOLLOW</text>
+    </svg>
+  </div>
+  <h2>Friends Feed</h2>
+  <div class="two-col" style="position:relative;z-index:1;">
     <div>
       <p style="font-size:0.85em;">Three visibility levels: <span class="pill">public</span> <span class="pill blue">friends</span> <span class="pill gray">private</span></p>
       <div class="highlight-box">
@@ -549,7 +726,7 @@ ORDER BY best_time_sec;</code></pre>
       </div>
     </div>
     <div>
-      <pre><code class="language-sql" style="font-size:0.55em;">SELECT a.id, a.title, u.username,
+      <pre><code class="language-sql" style="font-size:0.72em;">SELECT a.id, a.title, u.username,
   ROUND((a.distance/1000.0)::numeric,2)
     AS distance_km,
   COUNT(k.id) AS kudos
@@ -573,67 +750,6 @@ ORDER BY a.started_at DESC;</code></pre>
   </div>
 </section>
 
-<!-- 9. Indexes -->
-<section>
-  <h2>Indexes &amp; Performance</h2>
-  <table class="index-table">
-    <thead>
-      <tr><th>Index</th><th>Type</th><th>Why</th></tr>
-    </thead>
-    <tbody>
-      <tr><td><code>activities(owner_id)</code></td><td>B-tree</td><td>Feed filters by owner every request</td></tr>
-      <tr><td><code>activities(started_at)</code></td><td>B-tree</td><td>Feed sorted by date &mdash; avoids full sort</td></tr>
-      <tr><td><code>activities(visibility)</code></td><td>B-tree</td><td>Access control filter on every query</td></tr>
-      <tr><td><code>activities(path)</code></td><td><strong>GIST</strong></td><td>Spatial search for Fréchet matching</td></tr>
-      <tr><td><code>common_activities(path)</code></td><td><strong>GIST</strong></td><td>Find nearby reference routes</td></tr>
-      <tr><td><code>segments(path)</code></td><td><strong>GIST</strong></td><td>Segment detection on activity upload</td></tr>
-      <tr><td><code>friendships(requester_id/addressee_id)</code></td><td>B-tree</td><td>Bidirectional friend lookup</td></tr>
-      <tr><td><code>segment_efforts(segment_id/athlete_id)</code></td><td>B-tree</td><td>Leaderboard joins</td></tr>
-    </tbody>
-  </table>
-  <div class="highlight-box" style="margin-top:16px;font-size:0.72em;">
-    <strong>GIST</strong> = R-tree for geometry. Standard B-tree can't index spatial data &mdash; GIST builds bounding-box hierarchy for fast proximity filtering before computing exact Fréchet distance.
-  </div>
-</section>
-
-<!-- 10. Seed data -->
-<section>
-  <h2>Seed Data</h2>
-  <div class="two-col">
-    <div>
-      <ul>
-        <li>8 users with hashed passwords</li>
-        <li>3 common routes in Amsterdam</li>
-        <li>12 activities across all sport types</li>
-        <li>2 segments with efforts + leaderboard</li>
-        <li>10 friendship pairs</li>
-        <li>12 kudos entries</li>
-      </ul>
-    </div>
-    <div>
-      <div class="highlight-box">
-        All data valid against DB constraints &mdash; FK refs, enum values, unique pairs.<br/><br/>
-        Polylines are real encoded Google Polyline strings → decoded to geometry by trigger on insert.
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- 11. Checklist -->
-<section>
-  <h2>Requirements Checklist</h2>
-  <ul class="checklist">
-    <li>Domain description</li>
-    <li>Entities + critical scenarios</li>
-    <li>Database schema in SQL and DBML</li>
-    <li>Schema diagram (dbdiagram.io)</li>
-    <li>Fake valid seed data</li>
-    <li>3 SQL queries</li>
-    <li>Indexes + performance rationale</li>
-    <li class="bonus">Working MVP (local demo)</li>
-  </ul>
-</section>
-
 
 
 </div>
@@ -648,13 +764,15 @@ ORDER BY a.started_at DESC;</code></pre>
     transitionSpeed: 'fast',
     backgroundTransition: 'fade',
     controls: true,
-    progress: true,
+    progress: false,
     center: true,
     width: "100%",
     height: "100%",
     margin: 0,
     minScale: 1,
     maxScale: 1,
+    slideNumber: 'c/t',
+    showSlideNumber: 'all',
     plugins: [RevealHighlight],
   });
 </script>
