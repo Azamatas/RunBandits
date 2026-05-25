@@ -463,13 +463,13 @@
     .reveal .slides { overflow: visible !important; }
     .reveal .stack { overflow: visible !important; }
 
-    .reveal .slides > section:nth-child(n+3)::before {
-      content: "runbanditsrun.app";
+    .reveal .slides > section:nth-child(n+3):not(:last-child)::before {
+      content: "run.emptinessof.space";
       position: absolute;
-      top: 14px;
+      top: 0;
       left: 48px;
       font-family: var(--font);
-      font-size: 12px;
+      font-size: 36px;
       font-weight: 700;
       letter-spacing: 0.6px;
       color: var(--gray-400);
@@ -916,8 +916,11 @@ LIMIT 10;</code></pre>
   </div>
 </section>
 
-<!-- 9. End -->
-<section data-background-image="end.png" data-background-size="contain" data-background-color="#000"></section>
+<section data-background-image="end.png" data-background-size="contain" data-background-color="#000">
+  <div style="position:absolute;top:0;left:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;padding-top:360px;z-index:10;">
+    <span style="font-family:var(--font);font-size:64px;font-weight:800;color:var(--orange);-webkit-text-stroke:8px black;paint-order:stroke fill;text-shadow:0 0 24px rgba(252,76,2,0.5);">run.emptinessof.space</span>
+  </div>
+</section>
 
 </div>
 </div>

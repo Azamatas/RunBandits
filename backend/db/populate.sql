@@ -9,16 +9,16 @@
 
 -- Users
 INSERT INTO users (id, username, email, password_hash, bio, location, created_at) VALUES
-    (1, 'alice_runner', 'alice@example.com', '$2b$12$dummyhashalice', 'Marathon enthusiast and coffee addict. Training for Boston 2026!', 'Boston, MA', CURRENT_TIMESTAMP - INTERVAL '30 days'),
-    (2, 'bob_cyclist', 'bob@example.com', '$2b$12$dummyhashbob', 'Road cyclist. Love climbing hills and long century rides.', 'San Francisco, CA', CURRENT_TIMESTAMP - INTERVAL '25 days'),
-    (4, 'diana_hiker', 'diana@example.com', '$2b$12$dummyhashdiana', 'Trail runner and mountain hiker. Love the great outdoors!', 'Denver, CO', CURRENT_TIMESTAMP - INTERVAL '15 days'),
-    (5, 'eve_walker', 'eve@example.com', '$2b$12$dummyhasheve', 'Casual walker, love city walks and nature trails.', 'New York, NY', CURRENT_TIMESTAMP - INTERVAL '10 days'),
-    (6, 'frank_runner', 'frank@example.com', '$2b$12$dummyhashfrank', '5K and 10K specialist. Always chasing a new PR!', 'Chicago, IL', CURRENT_TIMESTAMP - INTERVAL '5 days'),
-    (7, 'grace_triathlete', 'grace@example.com', '$2b$12$dummyhashgrace', 'Ironman finisher. Bike, run, repeat.', 'Austin, TX', CURRENT_TIMESTAMP - INTERVAL '3 days'),
-    (8, 'henry_cyclist', 'henry@example.com', '$2b$12$dummyhashhenry', 'Gravel rider and bike packer.', 'Portland, OR', CURRENT_TIMESTAMP - INTERVAL '1 day'),
-    (9, 'ian_runner', 'ian@example.com', '$2b$12$dummyhashian', 'Ultra runner. Prefer trails to pavement.', 'Seattle, WA', CURRENT_TIMESTAMP - INTERVAL '2 days'),
-    (10, 'julia_trail', 'julia@example.com', '$2b$12$dummyhashjulia', 'Trail runner and weekend warrior.', 'Los Angeles, CA', CURRENT_TIMESTAMP - INTERVAL '1 day'),
-    (11, 'kevin_sprinter', 'kevin@example.com', '$2b$12$dummyhashkevin', 'Speed is my game. 400m to marathon.', 'Miami, FL', CURRENT_TIMESTAMP - INTERVAL '12 hours');
+    (1, 'alice_runner', 'alice@example.com', '$2b$12$0nn6WGA.VVddwHE5Fdizye3JEQHivkZiIjmcHD9Aqmkr7QxwgeT0i', 'Marathon enthusiast and coffee addict. Training for Boston 2026!', 'Boston, MA', CURRENT_TIMESTAMP - INTERVAL '30 days'),
+    (2, 'bob_cyclist', 'bob@example.com', '$2b$12$0nn6WGA.VVddwHE5Fdizye3JEQHivkZiIjmcHD9Aqmkr7QxwgeT0i', 'Road cyclist. Love climbing hills and long century rides.', 'San Francisco, CA', CURRENT_TIMESTAMP - INTERVAL '25 days'),
+    (4, 'diana_hiker', 'diana@example.com', '$2b$12$0nn6WGA.VVddwHE5Fdizye3JEQHivkZiIjmcHD9Aqmkr7QxwgeT0i', 'Trail runner and mountain hiker. Love the great outdoors!', 'Denver, CO', CURRENT_TIMESTAMP - INTERVAL '15 days'),
+    (5, 'eve_walker', 'eve@example.com', '$2b$12$0nn6WGA.VVddwHE5Fdizye3JEQHivkZiIjmcHD9Aqmkr7QxwgeT0i', 'Casual walker, love city walks and nature trails.', 'New York, NY', CURRENT_TIMESTAMP - INTERVAL '10 days'),
+    (6, 'frank_runner', 'frank@example.com', '$2b$12$0nn6WGA.VVddwHE5Fdizye3JEQHivkZiIjmcHD9Aqmkr7QxwgeT0i', '5K and 10K specialist. Always chasing a new PR!', 'Chicago, IL', CURRENT_TIMESTAMP - INTERVAL '5 days'),
+    (7, 'grace_triathlete', 'grace@example.com', '$2b$12$0nn6WGA.VVddwHE5Fdizye3JEQHivkZiIjmcHD9Aqmkr7QxwgeT0i', 'Ironman finisher. Bike, run, repeat.', 'Austin, TX', CURRENT_TIMESTAMP - INTERVAL '3 days'),
+    (8, 'henry_cyclist', 'henry@example.com', '$2b$12$0nn6WGA.VVddwHE5Fdizye3JEQHivkZiIjmcHD9Aqmkr7QxwgeT0i', 'Gravel rider and bike packer.', 'Portland, OR', CURRENT_TIMESTAMP - INTERVAL '1 day'),
+    (9, 'ian_runner', 'ian@example.com', '$2b$12$0nn6WGA.VVddwHE5Fdizye3JEQHivkZiIjmcHD9Aqmkr7QxwgeT0i', 'Ultra runner. Prefer trails to pavement.', 'Seattle, WA', CURRENT_TIMESTAMP - INTERVAL '2 days'),
+    (10, 'julia_trail', 'julia@example.com', '$2b$12$0nn6WGA.VVddwHE5Fdizye3JEQHivkZiIjmcHD9Aqmkr7QxwgeT0i', 'Trail runner and weekend warrior.', 'Los Angeles, CA', CURRENT_TIMESTAMP - INTERVAL '1 day'),
+    (11, 'kevin_sprinter', 'kevin@example.com', '$2b$12$0nn6WGA.VVddwHE5Fdizye3JEQHivkZiIjmcHD9Aqmkr7QxwgeT0i', 'Speed is my game. 400m to marathon.', 'Miami, FL', CURRENT_TIMESTAMP - INTERVAL '12 hours');
 
 -- Common Activities (frequently-matched shared routes)
 INSERT INTO common_activities (id, name, polyline, distance, sport_type) VALUES
